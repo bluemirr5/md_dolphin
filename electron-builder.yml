@@ -1,0 +1,40 @@
+appId: com.md-dolphin.app
+productName: md_dolphin
+directories:
+  buildResources: build
+  output: dist
+
+files:
+  - out/**/*
+  - '!**/*.map'
+
+mac:
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  extendInfo:
+    # AC11: .md ファイルをmd_dolphinで開く (Finder 더블클릭 연결)
+    CFBundleDocumentTypes:
+      - CFBundleTypeName: Markdown Document
+        CFBundleTypeRole: Viewer
+        LSHandlerRank: Default
+        LSItemContentTypes:
+          - net.daringfireball.markdown
+          - public.markdown
+        CFBundleTypeExtensions:
+          - md
+          - markdown
+
+dmg:
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

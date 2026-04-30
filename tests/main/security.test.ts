@@ -77,7 +77,7 @@ describe('AC11 — installSessionSecurity', () => {
     );
 
     expect(responseCb).toHaveBeenCalledTimes(1);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     expect(responseCb).toHaveBeenCalledWith(
       expect.objectContaining({
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -106,7 +106,7 @@ describe('AC11 — installSessionSecurity', () => {
     const responseCb = vi.fn();
     (capturedCallback as HeadersCallback)({ responseHeaders: {} }, responseCb);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     const csp: string = (responseCb.mock.calls[0] as [{ responseHeaders: Record<string, string[]> }])[0]
       .responseHeaders['Content-Security-Policy'][0];
     expect(csp).toContain("connect-src 'none'");
@@ -127,7 +127,7 @@ describe('AC11 — installSessionSecurity', () => {
     const responseCb = vi.fn();
     (capturedCallback as HeadersCallback)({ responseHeaders: {} }, responseCb);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     const csp: string = (responseCb.mock.calls[0] as [{ responseHeaders: Record<string, string[]> }])[0]
       .responseHeaders['Content-Security-Policy'][0];
     expect(csp).toContain('ws://localhost:*');

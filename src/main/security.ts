@@ -21,8 +21,10 @@ export function installSessionSecurity(session: Session, isDev: boolean): void {
   // 사이클 7에서 mddolphin-asset:// 허용으로 강화.
   const scriptSrc = isDev
     ? "script-src 'self' http://localhost:* 'unsafe-eval' 'unsafe-inline'"
-    : "script-src 'none'";
-  const styleSrc = isDev ? "style-src 'self' 'unsafe-inline'" : "style-src 'self'";
+    : "script-src 'self'";
+  const styleSrc = isDev
+    ? "style-src 'self' 'unsafe-inline'"
+    : "style-src 'self' 'unsafe-inline'";
   const connectSrc = isDev
     ? "connect-src 'self' ws://localhost:* http://localhost:*"
     : "connect-src 'none'";
