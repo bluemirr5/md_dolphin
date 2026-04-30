@@ -24,3 +24,11 @@
   --quote-bar: #8A7A60;
   --code-bg: #2C2C2E;
 }
+
+/* 윈도우 전체 배경·텍스트를 테마 변수에 종속시킨다 — .md-content 외부 영역(여백) 포함 */
+html,
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+}
