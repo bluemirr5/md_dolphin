@@ -1,0 +1,87 @@
+# 04. 미지·외부 의존·운영
+
+> 이 파일은 마스터 플랜의 **7·8·9장**을 다룹니다 — 기술적 미지(Unknowns), 외부 의존성 및 위험, 운영 계획.
+> 인덱스: `docs/plans/README.md`
+> **갱신 빈도**: 사이클 종료 시 미지 표 갱신, 새 의존성 추가 시 8장 갱신. doc-writer가 사이클 5/6/7/9/11a/11b 종료 시 우선 점검.
+
+---
+
+## 7. 기술적 미지(Unknowns)
+
+| 미지                                                            | 위험도     | 해소 시점                           | 해소 방법                                                                                                                                        |
+| --------------------------------------------------------------- | ---------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **markdown-it GFM 플러그인 커버리지** (정렬된 표, 체크박스 등)  | 낮음       | 사이클 5 시작 전                    | 0.5일 스파이크: 토큰 출력 검증. 부족한 부분은 자체 렌더러에서 보강.                                                                              |
+| **자체 React 렌더러의 큰 파일(1만+ 줄) 성능**                   | 높음       | 사이클 5/6/7 회귀 게이트 + 사이클 9 | 4.7.3 벤치 표준으로 측정. 사이클 5/6/7 회귀 ≤ 5초. 초과 시 사이클 9를 앞당겨 `react-virtuoso` 도입.                                              |
+| **shiki wasm 초기 로드 지연**                                   | 중         | 사이클 6                            | Lazy load + 첫 코드 블록까지 지연 허용. 또는 사전 빌드 시점에 정적 HTML 생성.                                                                    |
+| **Electron 콜드 스타트 시간 (1.5초 이내)**                      | 중         | 사이클 9                            | 4.7.3 벤치 표준으로 측정 후 splash 색상 사전 적용 / asar 압축 / 불필요 의존성 제거.                                                              |
+| **번들 크기 (130MB 이내)**                                      | 중         | 사이클 11a                          | electron-builder `compression: maximum`, asar, 불필요 ICU 데이터 제거.                                                                           |
+| **한글-영문 혼용 자간/조판 품질 (Chromium 렌더링)**             | 중         | 사이클 4                            | 한국어 README 5개로 시각 검토. 부족 시 Pretendard 번들 결정.                                                                                     |
+| **미서명 DMG의 Gatekeeper 우회 절차가 macOS 버전별로 다름**     | 중         | 사이클 11a                          | macOS 12·13·14·15 네 버전에서 직접 실행 테스트, 우회 단계 차이 문서화.                                                                           |
+| **Homebrew Cask 등록 절차와 자체 tap vs 공식 tap 트레이드오프** | 낮음       | 사이클 11b                          | 자체 tap으로 시작 → 안정화 후 공식 cask 제출.                                                                                                    |
+| **Electron 보안 표면 (IPC 검증, sanitize, CSP)**                | 중         | 사이클 1·3·7                        | 사이클 1에서 contextIsolation 의무화 + CSP `<meta>` + webRequest 이중방어, 사이클 3에서 IPC 입력 검증, 사이클 7에서 DOMPurify(style strip) 통합. |
+| **메모리 누수 (다중 윈도우 Phase 2 대비)**                      | 중         | 사이클 9                            | Chromium DevTools Memory 프로파일러로 누수 검증. 윈도우 close 시 Zustand 스토어 dispose.                                                         |
+| **Universal Binary 빌드 시간 (P2-10)**                          | 중         | 사이클 11a                          | macos-14 러너에서 `time pnpm dist` 측정. 30분 초과 시 arm64 우선 릴리스 옵션.                                                                    |
+| **Mermaid+KaTeX 동시 도입 시 파서 전환 비용 (P2-6)**            | 낮음(현재) | Phase 2 진입 시점                   | 4.2.2 의사결정 룰 적용. 단독이면 markdown-it 유지, 동시면 remark 검토.                                                                           |
+| **vitest worker pool OOM** (사이클 5 발견)                      | 낮음       | 사이클 9                            | 현재 `NODE_OPTIONS='--max-old-space-size=4096'`으로 회피. 테스트 인프라 개선은 사이클 9 성능 검증 시 재평가.                                    |
+| **markdown-it-task-lists html_inline 우회 패턴** (사이클 5)     | 낮음       | 사이클 7 (DOMPurify)                | 현재 `html: false`에서 html_inline 토큰을 React `<input>`으로 수동 변환. 사이클 7 DOMPurify 도입 시 `html_inline` 처리 정책과 충돌 여부 재확인. |
+| **gfm.css 표 색상 대비** (사이클 5 발견)                         | 매우낮음   | 사이클 9~10 (시각 다듬기)           | 라이트 모드에서 표 테두리(`--quote-bar`) vs 짝수 행(`--code-bg`)의 색상 대비 일부 미세 손실. 신규 CSS 변수 금지 제약(사이클 4 토큰 동결) 때문에 사이클 5에서는 수정 불가. 사이클 9~10 토큰 재검토 시 신규 변수 추가 검토. |
+
+---
+
+## 8. 외부 의존성 및 위험
+
+| 의존                             | 실패 시 영향                               | 대안                                                                                      |
+| -------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| **Electron** (Chromium + Node)   | 앱 자체                                    | Tauri로 마이그레이션 가능 (대규모 작업). 실패 가능성 매우 낮음.                           |
+| **markdown-it**                  | 파싱 전면                                  | remark/rehype 또는 micromark로 대체 가능. 토큰 변환 어댑터만 교체. 비용은 4.2.2.          |
+| **shiki**                        | 코드 색상 표현 손실                        | Prism.js 또는 highlight.js로 대체 가능.                                                   |
+| **DOMPurify / sanitize-html**    | XSS 방어 손실 — 보안 치명적                | 둘 중 하나 의무 사용. 둘 다 활성 유지보수.                                                |
+| **react-virtuoso**               | 큰 파일 성능 저하                          | `react-window` 또는 자체 가상화 구현                                                      |
+| **Pretendard 폰트** (OFL)        | 폰트 누락 시 시스템 폰트 fallback          | Apple SD Gothic Neo로 우아하게 대체                                                       |
+| **i18next**                      | 다국어 손실                                | react-intl로 대체 가능                                                                    |
+| **electron-builder**             | 패키징 실패                                | electron-forge로 대체 (사이클 11a에서 결정 게이트)                                        |
+| **GitHub Releases (배포 채널)**  | 다운로드 불가                              | Homebrew Cask 채널 병행. Cloudflare R2 자체 호스팅도 옵션                                 |
+| **Homebrew Cask**                | 설치 자동화 채널 손실                      | GitHub Releases 직접 다운로드로 우회                                                      |
+| **macOS Gatekeeper 정책 변화**   | 미서명 앱 우회 불가                        | 결정 게이트 시그널 모니터링, 트리거 시 노타라이즈 전환                                    |
+| **Xcode Command Line Tools**     | 코드 서명·공증 불가 (Phase 2 진입 후 영향) | macOS 표준 도구라 누락 가능성 낮음. Phase 1은 미서명이라 영향 없음.                       |
+| **GitHub Actions macos-14 러너** | Universal Binary 빌드 시간 변동            | (P2-10) 30분 초과 시 arm64 우선 릴리스 옵션. macos-13 러너로 fallback 가능(x64 네이티브). |
+
+**의도적으로 회피한 의존성**:
+
+- Apple Developer Program ($99/년) — Phase 1 비범위
+- 클라우드, 분석 SDK, 결제, 인증, AI API — 의도적 배제
+
+---
+
+## 9. 운영 계획
+
+- **배포 (Phase 1)**:
+  - **GitHub Releases**로 미서명 `.dmg` 직접 배포 + SHA256 체크섬
+  - **Homebrew Cask** 병행 — `auto_updates: false` + `livecheck` GitHub Releases (P2-11)
+  - Apple Developer Program **가입하지 않음**
+  - README에 Gatekeeper 우회 안내 + **번들 크기·메모리 솔직 표기 (130MB / 200MB)** 필수
+
+- **배포 (Phase 2 — 게이트 통과 시)**:
+  - 첫 사이클 묶음은 0.4 (사이클 P2-1) 참조 (`05-changelog.md`)
+  - Apple Developer Program 가입 → Developer ID → `electron-builder` notarize 자동화 (`afterSign` 훅)
+  - **`electron-updater`** 자동 업데이트 도입 → Cask `auto_updates: true`로 변경
+  - Mac App Store는 Phase 3 이후 (Electron 앱은 샌드박스 호환 작업 별도)
+
+- **모니터링**:
+  - **로컬 충돌 로깅** — `app.on('render-process-gone')`, `app.on('child-process-gone')` 캡처. 사용자 데이터 외부 전송 없음. 로그는 사용자가 수동으로 GitHub Issues에 첨부.
+  - **GitHub Issues 라벨링** — `installation-failure`, `gatekeeper`, `crash`, `bundle-size` 등으로 결정 게이트 시그널 추적
+  - **외부 분석 SDK 없음**
+
+- **백업**: 앱 자체가 사용자 파일을 저장하지 않음. 사용자 설정은 `electron-store`(JSON in `~/Library/Application Support/md_dolphin/`) — 손실 시 기본값.
+
+- **비용 (Phase 1)**:
+  - 개발자 계정: **$0**
+  - 호스팅: **$0** (GitHub Releases + Homebrew Cask)
+  - 도메인 (선택): **$15/년**
+  - **총 운영 비용: 연 $0~15**
+
+- **비용 (Phase 2 게이트 통과 시)**:
+  - Apple Developer Program: $99/년
+  - **총 운영 비용: 연 $99~115**
+
+- **버전 정책**: 시맨틱 버저닝(MAJOR.MINOR.PATCH). macOS 12 미만 호환은 영구히 비범위.
