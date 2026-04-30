@@ -23,7 +23,12 @@ model: haiku
 - **파일 단위**: 특정 spec 또는 마스터 플랜
 - **전체**: 명시 없으면 마스터 플랜 + 최근 N 사이클의 spec 모두
 
-`Glob`으로 `docs/plan/*.md`, `docs/specs/*.md` 목록 확인.
+`Glob`으로 `docs/plans/*.md`, `docs/specs/*.md` 목록 확인.
+
+**마스터 플랜 구조 확인 (read 효율화)**:
+- `docs/plans/README.md`가 있으면 **분할 구조** — 인덱스 먼저 read해서 어느 파일이 점검 대상인지 라우팅. 전체 파일 read 금지 (누적 토큰 폭증)
+- 인덱스 부재 + `master-plan.md` 단독이면 **단일 파일 구조** — 그대로 read
+- 단일 파일이 400줄/10k 토큰을 초과하면 **분할 권고** 항목으로 보고에 포함 (planner 재호출 또는 직접 분할 제안)
 
 ### 2. 변경 이력 확인
 
@@ -37,7 +42,9 @@ model: haiku
 
 #### 3-1. 마스터 플랜 점검
 
-`docs/plan/master-plan.md`의 각 섹션을 코드와 대조:
+**분할 구조라면 인덱스(`docs/plans/README.md`)의 "사이클 종료 갱신 체크리스트"·"파일 맵"·"sub-agent read 가이드"를 먼저 read**하고, 거기 명시된 갱신 대상 파일만 read·Edit. 단일 `master-plan.md`라면 그 파일 하나를 점검.
+
+각 섹션을 코드와 대조:
 
 - **기술 스택**: `package.json`의 실제 의존성과 일치하는가?
 - **아키텍처 다이어그램**: 실제 디렉토리 구조·모듈 관계와 일치하는가?
@@ -175,9 +182,10 @@ model: haiku
 
 `Edit`으로 직접 갱신한 내역. 각 파일별 diff 요약:
 
-- `docs/plan/master-plan.md`:
-  - 사이클 3 상태: 진행중 → 완료
-  - 의존성 표: Stripe 추가
+- `docs/plans/master-plan.md` (또는 분할 구조 시 해당 파일):
+  - 사이클 3 상태: 진행중 → 완료 (예: `03-cycles.md` 사이클 표 행)
+  - 의존성 표: Stripe 추가 (예: `04-deps-impact.md`)
+  - 변경 이력 1행 추가 (예: `05-changelog.md` 0.1)
 - `docs/specs/user-auth.md`:
   - Open Question 2개 해소되어 본문으로 이동
 
@@ -206,7 +214,9 @@ model: haiku
 
 ## 다른 에이전트와의 연계
 
-- **planner**: 마스터 플랜과 코드의 drift가 크면 plan 갱신을 사용자에게 권유
+- **planner**: 마스터 플랜과 코드의 drift가 크면 plan 갱신을 사용자에게 권유. 마스터 플랜 단일 파일이 400줄 / 10k 토큰을 초과하면 planner 재호출하여 분할 의무
 - **spec-writer**: spec과 구현 차이가 발견되면 spec-writer 재호출 권유
 - **architect**: 구조적 drift가 발견되면 architect 검토 요청
 - **다른 에이전트들**: 사이클 종료 시 인수인계 노트가 다음 사이클 시작의 컨텍스트가 됨
+
+**파일 비대화 모니터링 (의무)**: 점검 시작 시 `wc -l docs/plans/*.md`로 줄 수 확인. 400줄을 초과한 파일이 있으면 보고의 "권장사항" 섹션에 분할 권고를 포함 (sub-agent read 토큰 절약 목적). 갱신 작업으로 인해 파일이 임계 초과로 넘어가면 사용자에게 즉시 보고.

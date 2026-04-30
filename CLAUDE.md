@@ -3,7 +3,7 @@
 ## 프로젝트 개요
 
 macOS 마크다운 뷰어. 스택: Electron + TypeScript + React + Vite (electron-vite, pnpm).  
-마스터 플랜: `docs/plans/master-plan.md`  
+마스터 플랜 인덱스: `docs/plans/README.md` (8개 파일로 분할). 기존 `docs/plans/master-plan.md`는 redirect stub.  
 사이클 스펙: `docs/specs/cycle-NN-<name>.md`
 
 ## 사이클 스펙 작성 규칙 (spec-writer)
@@ -22,7 +22,7 @@ macOS 마크다운 뷰어. 스택: Electron + TypeScript + React + Vite (electro
 
 ### 금지할 것
 
-1. **마스터 플랜 재서술** — 결정·근거는 이미 마스터 플랜에 있음. cross-reference 코드(P2-6 등)만 허용
+1. **마스터 플랜 재서술** — 결정·근거는 이미 마스터 플랜에 있음. cross-reference 코드(P2-6 등)만 허용. 코드 위치는 `docs/plans/README.md`의 매핑 표에서 확인 (결정 본문 = `01-decisions.md`, 변경 이력 = `05-changelog.md`, 사이클 표 = `03-cycles.md`)
 2. **TDD 라인별 대본** — red: `...` / green: `...` / refactor: `...` 풀어쓰기 금지. 라운드 표 1줄로 대체
 3. **Out of Scope 장문** — 사이클 단위 1줄씩 ("사이클 7: DOMPurify, 이미지")
 4. **엣지 케이스 표** — 테스트 코드에 있어야 할 내용. 스펙에 불필요
@@ -41,7 +41,7 @@ macOS 마크다운 뷰어. 스택: Electron + TypeScript + React + Vite (electro
 4. **code-reviewer** — 구현 후 리뷰
 5. **test-writer** — 사후 테스트 보강 (필요 시)
 
-architect 리뷰 결과는 스펙의 변경 이력 또는 마스터 플랜 0.1에 P{N}-{i} 형식으로 기록.
+architect 리뷰 결과는 스펙의 변경 이력 또는 `docs/plans/05-changelog.md` 0.1 표에 P{N}-{i} 형식으로 기록.
 
 ## 일반 규칙
 
