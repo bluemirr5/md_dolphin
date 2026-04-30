@@ -463,7 +463,7 @@ Phase 2 확장:
 | 로컬 이미지 접근              | custom protocol (`mddolphin-asset://`) — 4.4.2의 화이트리스트 정책 의무 적용                                                                  |
 | CSP (Content-Security-Policy) | `default-src 'self'; img-src 'self' https: data: mddolphin-asset:; style-src 'self' 'unsafe-inline'; script-src 'self'` (4.4.1 결정 근거)     |
 | CSP 적용 위치                 | **`<meta>` + `session.webRequest.onHeadersReceived` 이중방어** (4.4.1)                                                                        |
-| IPC 메시지                    | 모든 IPC 채널에 대해 main 측 입력 검증 (path traversal 방지)                                                                                  |
+| IPC 메시지                    | 모든 IPC 채널에 대해 main 측 입력 검증 (path traversal 방지). `SAFE_EXTERNAL_PROTOCOLS` 상수는 `src/main/security.ts`에서 단일 정의 후 export (사이클 3에서 중복 제거됨, P3-1) |
 
 **보안 위협 모델**:
 
@@ -691,23 +691,23 @@ interface AppSettings {
 - **단락 간격**: 1.2em
 - **제목 위계**: H1 32px / H2 26px / H3 20px / H4 18px / 본문 17px (모듈러 스케일 1.25)
 
-### 5.2 색상과 대비 (CSS 변수)
+### 5.2 색상과 대비 (CSS 변수, 사이클 4 확정)
 
-```css
-/* 라이트 */
---bg: #fafaf7;
---text: #1c1c1e;
---quote-bar: #a0a0a5;
---code-bg: #f2f2ee;
+CSS 변수 정의 (동일 이름 재정의 패턴 — 설계 제약 참조):
 
-/* 다크 */
---bg-dark: #1c1c1e;
---text-dark: #e8e8e3;
---code-bg-dark: #2a2a2d;
-```
+| 변수명 | 라이트 모드 | 다크 모드 | 용도 |
+|--------|-----------|---------|------|
+| `--bg` | `#FAFAF7` | `#1C1C1E` | 배경색 (본문·window) |
+| `--text` | `#1A1A1A` | `#E5E5E7` | 본문 텍스트 |
+| `--quote-bar` | `#C0B090` | `#8A7A60` | 인용문 좌측 border |
+| `--code-bg` | `#F0EDE6` | `#2C2C2E` | 코드 블록·인라인 배경 |
 
-- **WCAG AA 대비비** 4.5:1 이상 보장.
-- `nativeTheme.shouldUseDarkColors`로 시스템 외관 자동 추종, 사용자 강제 라이트/다크 옵션은 Phase 1 후반.
+**특성**:
+
+- **WCAG AA 대비비** 4.5:1 이상 보장 (라이트 text#1A1A1A on bg#FAFAF7 ≈ 12.5:1, 다크 text#E5E5E7 on bg#1C1C1E ≈ 11:1).
+- **`:root[data-theme='light'|'dark']` 양 블록에서 동일 변수명 재정의** — 컴포넌트는 분기 무지.
+- `:root` fallback 블록(data-theme 미설정 시)은 라이트 값으로 FOUC 방지 (P4-3).
+- `nativeTheme.shouldUseDarkColors`로 시스템 외관 자동 추종. 사용자 강제 라이트/다크 옵션은 Phase 2 (사이클 10 후 사용자 설정 UI).
 
 ### 5.3 코드 블록을 비개발자가 봐도 위협적이지 않게
 

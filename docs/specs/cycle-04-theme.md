@@ -56,7 +56,7 @@
 | AC3 | ThemeProvider mount → `document.documentElement.dataset.theme`이 `api.getTheme()` 결과와 일치. watchTheme push('dark') 시 dataset 갱신 | pnpm test (RTL + api mock) |
 | AC4 | main `theme-service.getCurrentTheme()` → `nativeTheme.shouldUseDarkColors` true 시 'dark', false 시 'light' | pnpm test (nativeTheme mock) |
 | AC5 | `nativeTheme.on('updated')` 발화 시 `isDestroyed() === false`인 BrowserWindow에만 `webContents.send(API_THEME_UPDATED, { theme, source: 'native' })` 호출 (destroyed 윈도우는 skip) | pnpm test (mock app + 2 win 중 1개 destroyed) |
-| AC6 | preload `window.api` 표면: `openFile`, `readFile`, `openExternal`, `getDroppedFilePath`, `getTheme`, `watchTheme` 6개. ipc-channels.ts에 `API_GET_THEME`, `API_THEME_UPDATED` 2개 신규 export (사이클 5 미포함) | pnpm typecheck (api.d.ts) |
+| AC6 | preload `window.api` 표면: `openFile`, `readFile`, `openExternal`, `getDroppedFilePath`, `onDocumentOpened`, `getTheme`, `watchTheme` 7개 (사이클 3에서 onDocumentOpened 추가됨). ipc-channels.ts에 `API_GET_THEME`, `API_THEME_UPDATED` 2개 신규 export (사이클 5 미포함) | pnpm typecheck (api.d.ts) |
 | AC7 | theme.css `:root[data-theme='light']`·`:root[data-theme='dark']` 양 블록에 `--bg`, `--text`, `--quote-bar`, `--code-bg` 4개 변수 정의 (마스터 플랜 5.2 색상 일치) | 수동 grep |
 | AC8 | typography.css `.md-content` 본문 폭 680px·행간 1.7·17px, H1 32px / H2 26px / H3 20px / H4 18px, 한글 자간 -0.01em, 단락 1.2em | 수동 grep |
 | AC9 | `pnpm dev` → System Settings > Appearance Light↔Dark 토글 시 본문 배경·텍스트 즉시 전환 (재시작 불필요) | 수동 1회 |
