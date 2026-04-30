@@ -13,3 +13,9 @@ export const API_OPEN_EXTERNAL = 'api:openExternal' as const;
 
 /** main → renderer: 파일이 열렸음을 알림 (open-file-handler flush) */
 export const API_DOCUMENT_OPENED = 'api:documentOpened' as const;
+
+/** renderer → main: 현재 테마 조회 (invoke) */
+export const API_GET_THEME = 'api:getTheme' as const;
+
+/** main → renderer: 테마 변경 push (on) — nativeTheme.updated 이벤트 기반 */
+export const API_THEME_UPDATED = 'api:themeUpdated' as const;

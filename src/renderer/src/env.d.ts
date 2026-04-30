@@ -19,6 +19,14 @@ interface OpenedFileError {
 
 type OpenedFileResult = OpenedFileSuccess | OpenedFileError;
 
+// 테마 타입 — preload 의존 제거를 위해 인라인 선언
+type RenderingTheme = 'light' | 'dark';
+
+interface ThemeUpdatePayload {
+  readonly theme: RenderingTheme;
+  readonly source: 'native' | 'manual';
+}
+
 interface Window {
   readonly api: {
     readonly openFile: () => Promise<OpenedFileResult | null>;
@@ -26,5 +34,7 @@ interface Window {
     readonly openExternal: (url: string) => Promise<void>;
     readonly getDroppedFilePath: (file: File) => string;
     readonly onDocumentOpened: (callback: (filePath: string) => void) => () => void;
+    readonly getTheme: () => Promise<RenderingTheme>;
+    readonly watchTheme: (callback: (payload: ThemeUpdatePayload) => void) => () => void;
   };
 }

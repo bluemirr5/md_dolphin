@@ -1,5 +1,5 @@
 // preload — contextBridge로 renderer에 좁은 IPC 표면을 노출한다.
-// 설계 제약: openFile, readFile, openExternal, getDroppedFilePath 4개만 노출
+// 설계 제약: openFile, readFile, openExternal, getDroppedFilePath, onDocumentOpened, getTheme, watchTheme 7개 노출
 // drop 파일 경로: webUtils.getPathForFile 사용 — sandbox=true 환경에서 File.path 제거됨 (Electron 32+)
 import { contextBridge, ipcRenderer, webUtils } from 'electron';
 import {
@@ -7,8 +7,11 @@ import {
   API_READ_FILE,
   API_OPEN_EXTERNAL,
   API_DOCUMENT_OPENED,
+  API_GET_THEME,
+  API_THEME_UPDATED,
 } from '@shared/ipc-channels';
 import type { OpenedFileResult } from '../main/file-service';
+import type { RenderingTheme, ThemeUpdatePayload } from '@shared/theme-types';
 
 const api = {
   /**
@@ -46,6 +49,27 @@ const api = {
     // 정리 함수 반환 — React useEffect cleanup에서 사용
     return () => {
       ipcRenderer.removeListener(API_DOCUMENT_OPENED, handler);
+    };
+  },
+
+  /**
+   * 현재 시스템 테마(resolved)를 조회한다.
+   * nativeTheme.shouldUseDarkColors 기반 — 항상 'light' | 'dark' 반환.
+   */
+  getTheme: (): Promise<RenderingTheme> =>
+    ipcRenderer.invoke(API_GET_THEME) as Promise<RenderingTheme>,
+
+  /**
+   * 시스템 테마 변경 이벤트를 구독한다.
+   * 반환된 dispose 함수를 호출하면 구독이 해제된다 (ThemeProvider unmount 시 사용).
+   * Strict Mode 안전: mount→dispose→remount 시 리스너 1개만 생존.
+   */
+  watchTheme: (callback: (payload: ThemeUpdatePayload) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, payload: ThemeUpdatePayload) =>
+      callback(payload);
+    ipcRenderer.on(API_THEME_UPDATED, handler);
+    return () => {
+      ipcRenderer.removeListener(API_THEME_UPDATED, handler);
     };
   },
 } as const;

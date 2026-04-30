@@ -1,23 +1,31 @@
 // IPC 핸들러 등록 — ipcMain.handle 으로 renderer 요청을 처리한다.
 // 모든 throw는 OpenedFileError 형태로 정규화하여 renderer에 반환 (설계 제약)
 import { ipcMain, shell, BrowserWindow } from 'electron';
-import { API_OPEN_FILE, API_READ_FILE, API_OPEN_EXTERNAL } from '@shared/ipc-channels';
+import {
+  API_OPEN_FILE,
+  API_READ_FILE,
+  API_OPEN_EXTERNAL,
+  API_GET_THEME,
+  API_THEME_UPDATED,
+} from '@shared/ipc-channels';
 import type { FileService } from './file-service';
 import type { DocumentWindowManager } from './document-window';
 import { dirname } from 'node:path';
-
-const SAFE_EXTERNAL_PROTOCOLS: ReadonlySet<string> = new Set(['https:', 'http:', 'mailto:']);
+import { getCurrentTheme, watchTheme } from './theme-service';
+import type { ThemeUpdatePayload } from '@shared/theme-types';
+import { SAFE_EXTERNAL_PROTOCOLS } from './security';
 
 /**
  * IPC 핸들러를 등록한다.
  *
- * @param fileService  파일 읽기/다이얼로그 서비스
+ * @param fileService   파일 읽기/다이얼로그 서비스
  * @param windowManager 윈도우별 baseDir 관리
+ * @returns dispose — nativeTheme 리스너 해제 함수 (app quit 시 호출)
  */
 export function registerIpcHandlers(
   fileService: FileService,
   windowManager: DocumentWindowManager,
-): void {
+): () => void {
   // api:openFile — 다이얼로그 열기
   ipcMain.handle(API_OPEN_FILE, async (event) => {
     try {
@@ -73,6 +81,27 @@ export function registerIpcHandlers(
       // 잘못된 URL — 무시
     }
   });
+
+  // api:getTheme — 현재 resolved 테마 반환 (invoke)
+  ipcMain.handle(API_GET_THEME, () => getCurrentTheme());
+
+  // nativeTheme.updated → 모든 BrowserWindow에 broadcast (app 수명 단일 등록)
+  const disposeThemeWatch = watchTheme((payload: ThemeUpdatePayload) => {
+    broadcastThemeUpdate(payload);
+  });
+
+  return disposeThemeWatch;
+}
+
+/**
+ * 살아있는 모든 BrowserWindow의 renderer에 테마 업데이트를 broadcast한다.
+ * destroyed 윈도우는 건너뜀 (P4-2: 예외 방지).
+ */
+function broadcastThemeUpdate(payload: ThemeUpdatePayload): void {
+  for (const win of BrowserWindow.getAllWindows()) {
+    if (win.isDestroyed() || win.webContents.isDestroyed()) continue;
+    win.webContents.send(API_THEME_UPDATED, payload);
+  }
 }
 
 /**

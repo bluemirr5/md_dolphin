@@ -1,5 +1,7 @@
 import type { App, Session } from 'electron';
 
+export const SAFE_EXTERNAL_PROTOCOLS: ReadonlySet<string> = new Set(['https:', 'http:', 'mailto:']);
+
 // [SEC] sandbox 활성화는 반드시 app.whenReady() 이전에 호출해야 한다.
 // 이후에 호출하면 경고와 함께 무시되므로 타이밍 보장이 중요하다.
 export function enableSandboxBeforeReady(app: App): void {

@@ -1,0 +1,26 @@
+/* theme.css — CSS 변수 토큰 (마스터 플랜 5.2)
+ * 설계 제약: --bg-dark 등 별도 키 금지. 양 블록에서 동일 변수명 재정의.
+ * 진입점: document.documentElement.dataset.theme (단일화, P4-1)
+ * 컴포넌트 CSS는 분기 무지 (color: var(--text) 만 작성) */
+
+/* fallback: data-theme 미설정 시(ThemeProvider 초기화 전) light 값 사용 — FOUC 방지 */
+:root {
+  --bg: #FAFAF7;
+  --text: #1A1A1A;
+  --quote-bar: #C0B090;
+  --code-bg: #F0EDE6;
+}
+
+:root[data-theme='light'] {
+  --bg: #FAFAF7;
+  --text: #1A1A1A;
+  --quote-bar: #C0B090;
+  --code-bg: #F0EDE6;
+}
+
+:root[data-theme='dark'] {
+  --bg: #1C1C1E;
+  --text: #E5E5E7;
+  --quote-bar: #8A7A60;
+  --code-bg: #2C2C2E;
+}

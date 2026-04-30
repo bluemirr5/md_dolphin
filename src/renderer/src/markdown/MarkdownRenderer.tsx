@@ -147,9 +147,10 @@ interface MarkdownRendererProps {
 }
 
 // AC8: 빈 rawText에도 <article> wrapper 존재
+// className="md-content" — CSS 변수·타이포 토큰 스코프 (사이클 4, 설계 제약: prop 변경 없음)
 export function MarkdownRenderer({ document }: MarkdownRendererProps): JSX.Element {
   const tokens = renderTokens(document.rawText);
   const blocks = tokenStreamToBlocks(tokens);
 
-  return <article>{blocks.map((b) => b.element)}</article>;
+  return <article className="md-content">{blocks.map((b) => b.element)}</article>;
 }

@@ -1,14 +1,16 @@
-// App.tsx — 사이클 3: 파일 열기 통합
-// - DropZone 래핑
-// - store 구독 (MarkdownRenderer에 prop으로 전달 — 설계 제약: MarkdownRenderer는 store 직접 구독 금지)
-// - ⌘O 메뉴 응답 (api:openFile IPC 수신)
-// - 사이클 2 DEMO_RAW_TEXT 제거
+// App.tsx — 사이클 4: ThemeProvider 합류
+// - ThemeProvider(외) → DocumentProvider(내) 순서 고정 (P3-6, P4-1)
+// - theme.css·typography.css 글로벌 CSS import
+// - 사이클 3 DropZone·⌘O·IPC 유지
 import { useEffect } from 'react';
 import { MarkdownRenderer } from './markdown/MarkdownRenderer';
 import { parseMarkdown } from './markdown/adapter';
 import { DocumentProvider, useDocumentStore } from './store/document-store.factory';
+import { ThemeProvider } from './context/ThemeProvider';
 import { DropZone } from './components/DropZone';
 import type { DocumentData } from './store/document-store';
+import './styles/theme.css';
+import './styles/typography.css';
 
 // 빈 문서 — 파일 미로드 시 안내 메시지 표시용
 const EMPTY_HINT_TEXT = `\
@@ -66,29 +68,18 @@ function AppInner(): JSX.Element {
 
   return (
     <DropZone onFileDrop={handleFileDrop}>
-      <main
-        style={{
-          maxWidth: '800px',
-          margin: '0 auto',
-          padding: '32px 24px',
-          fontFamily:
-            '-apple-system, "SF Pro Text", system-ui, "Apple SD Gothic Neo", sans-serif',
-          color: '#1C1C1E',
-          background: '#FAFAF7',
-          minHeight: '100vh',
-        }}
-      >
-        <MarkdownRenderer document={rendererDocument} />
-      </main>
+      <MarkdownRenderer document={rendererDocument} />
     </DropZone>
   );
 }
 
 function App(): JSX.Element {
   return (
-    <DocumentProvider>
-      <AppInner />
-    </DocumentProvider>
+    <ThemeProvider>
+      <DocumentProvider>
+        <AppInner />
+      </DocumentProvider>
+    </ThemeProvider>
   );
 }
 

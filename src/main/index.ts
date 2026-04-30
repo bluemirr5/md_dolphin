@@ -1,20 +1,22 @@
-import { app, BrowserWindow, shell, session } from 'electron';
+import { app, BrowserWindow, shell, session, nativeTheme } from 'electron';
 import { join } from 'node:path';
 import { isMacOS } from '@shared/platform';
-import { enableSandboxBeforeReady, installSessionSecurity } from './security';
+import { enableSandboxBeforeReady, installSessionSecurity, SAFE_EXTERNAL_PROTOCOLS } from './security';
 import { FileService } from './file-service';
 import { DocumentWindowManager } from './document-window';
 import { registerIpcHandlers } from './ipc-handlers';
 import { registerOpenFileHandler, flushQueueToWindow } from './open-file-handler';
 import { installMenu } from './menu';
 
+// BrowserWindow 초기 배경색 — nativeTheme 기반 동적 결정 (DoD B, P4-3)
+// ThemeProvider await 동안 첫 paint 색상 일치 → FOUC 방지
+const BACKGROUND_COLOR_LIGHT = '#FAFAF7';
+const BACKGROUND_COLOR_DARK = '#1C1C1E';
+
 // [SEC] sandbox는 app.whenReady() 이전에 활성화해야 한다
 enableSandboxBeforeReady(app);
 
 const isDev = !app.isPackaged;
-
-// [SEC] 외부 브라우저로 열 수 있는 스킴을 제한
-const SAFE_EXTERNAL_PROTOCOLS: ReadonlySet<string> = new Set(['https:', 'http:', 'mailto:']);
 
 function openExternalSafe(url: string): void {
   try {
@@ -35,13 +37,18 @@ const windowManager = new DocumentWindowManager();
 registerOpenFileHandler(app);
 
 function createMainWindow(): BrowserWindow {
+  // 시스템 테마 기반 초기 배경색 결정 (P4-3)
+  const backgroundColor = nativeTheme.shouldUseDarkColors
+    ? BACKGROUND_COLOR_DARK
+    : BACKGROUND_COLOR_LIGHT;
+
   const window = new BrowserWindow({
     width: 1024,
     height: 768,
     minWidth: 640,
     minHeight: 480,
     show: false,
-    backgroundColor: '#FAFAF7',
+    backgroundColor,
     titleBarStyle: 'default',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -91,8 +98,9 @@ void app.whenReady().then(() => {
   // [SEC] session.defaultSession은 whenReady() 이후에 안정적으로 접근 가능
   installSessionSecurity(session.defaultSession, isDev);
 
-  // IPC 핸들러 등록
-  registerIpcHandlers(fileService, windowManager);
+  // IPC 핸들러 등록 — dispose는 app quit 시 정리
+  const disposeIpcHandlers = registerIpcHandlers(fileService, windowManager);
+  app.once('before-quit', disposeIpcHandlers);
 
   // 메뉴 설치 — fileService + windowManager 주입
   installMenu(fileService, windowManager);
