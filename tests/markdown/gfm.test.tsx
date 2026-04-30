@@ -2,7 +2,7 @@
 // AC3: 표 thead/tbody 구조 + 정렬 className
 // AC4: ~~strike~~ → <del>
 // AC5: ul/ol/li, nested, ordered start 보존
-// AC6: autolink (angle / linkify bare) → <a target=_blank rel="noopener noreferrer">
+// AC6: autolink (angle / linkify bare) → <a target=_blank rel="noreferrer noopener">
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { MarkdownRenderer } from '../../src/renderer/src/markdown/MarkdownRenderer';
@@ -159,7 +159,7 @@ describe('AC5 — List / ListItem', () => {
   });
 });
 
-// ===== AC6: autolink → <a target=_blank rel="noopener noreferrer"> =====
+// ===== AC6: autolink → <a target=_blank rel="noreferrer noopener"> =====
 describe('AC6 — Autolink (Link.tsx 재사용)', () => {
   it('angle bracket <https://example.com> → <a> 렌더', () => {
     const { container } = render(
@@ -170,13 +170,13 @@ describe('AC6 — Autolink (Link.tsx 재사용)', () => {
     expect(a?.getAttribute('href')).toBe('https://example.com');
   });
 
-  it('angle bracket autolink → target=_blank rel="noopener noreferrer"', () => {
+  it('angle bracket autolink → target=_blank rel="noreferrer noopener"', () => {
     const { container } = render(
       <MarkdownRenderer document={mkDoc('<https://example.com>\n')} />,
     );
     const a = container.querySelector('a');
     expect(a?.getAttribute('target')).toBe('_blank');
-    expect(a?.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(a?.getAttribute('rel')).toBe('noreferrer noopener');
   });
 
   it('bare URL https://example.com (linkify) → <a> 렌더', () => {
@@ -188,13 +188,13 @@ describe('AC6 — Autolink (Link.tsx 재사용)', () => {
     expect(a?.getAttribute('href')).toBe('https://example.com');
   });
 
-  it('bare URL (linkify) → target=_blank rel="noopener noreferrer"', () => {
+  it('bare URL (linkify) → target=_blank rel="noreferrer noopener"', () => {
     const { container } = render(
       <MarkdownRenderer document={mkDoc('Visit https://example.com please.\n')} />,
     );
     const a = container.querySelector('a');
     expect(a?.getAttribute('target')).toBe('_blank');
-    expect(a?.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(a?.getAttribute('rel')).toBe('noreferrer noopener');
   });
 });
 

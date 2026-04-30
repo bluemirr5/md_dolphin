@@ -51,7 +51,7 @@ describe('AC7 — 기본 HTML 요소 렌더링', () => {
     const link = container.querySelector('a');
     expect(link).not.toBeNull();
     expect(link?.getAttribute('target')).toBe('_blank');
-    expect(link?.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(link?.getAttribute('rel')).toBe('noreferrer noopener');
     expect(link?.getAttribute('href')).toBe('https://example.com');
   });
 

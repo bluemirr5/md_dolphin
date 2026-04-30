@@ -7,6 +7,7 @@ import {
   API_OPEN_EXTERNAL,
   API_GET_THEME,
   API_THEME_UPDATED,
+  API_GET_WINDOW_ID,
 } from '@shared/ipc-channels';
 import type { FileService } from './file-service';
 import type { DocumentWindowManager } from './document-window';
@@ -14,6 +15,39 @@ import { dirname } from 'node:path';
 import { getCurrentTheme, watchTheme } from './theme-service';
 import type { ThemeUpdatePayload } from '@shared/theme-types';
 import { SAFE_EXTERNAL_PROTOCOLS } from './security';
+
+/** shell.openExternal의 최소 인터페이스 — 테스트 DI용 */
+export interface ShellLike {
+  openExternal(url: string): Promise<void>;
+}
+
+/**
+ * api:openExternal 핸들러 본문 — 순수 함수로 분리하여 테스트 가능 (P7-1, 마스터 플랜 4.4)
+ *
+ * 검증 순서:
+ * 1. URL 파싱 가능 여부 (잘못된 URL → reject + warn)
+ * 2. SAFE_EXTERNAL_PROTOCOLS 화이트리스트 (http/https/mailto 외 → reject + warn)
+ * 3. 통과 시 shell.openExternal 호출
+ */
+export async function handleOpenExternal(
+  url: string,
+  deps: { shell: ShellLike } = { shell },
+): Promise<void> {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    console.warn('[api:openExternal] 잘못된 URL:', url);
+    throw new Error(`invalid URL: ${url}`);
+  }
+
+  if (!SAFE_EXTERNAL_PROTOCOLS.has(parsed.protocol)) {
+    console.warn('[api:openExternal] 비허용 protocol 거부:', parsed.protocol, url);
+    throw new Error(`protocol not allowed: ${parsed.protocol}`);
+  }
+
+  await deps.shell.openExternal(url);
+}
 
 /**
  * IPC 핸들러를 등록한다.
@@ -71,26 +105,34 @@ export function registerIpcHandlers(
   });
 
   // api:openExternal — 외부 URL 열기 (스킴 검증)
-  ipcMain.handle(API_OPEN_EXTERNAL, (_event, url: string) => {
-    try {
-      const parsed = new URL(url);
-      if (SAFE_EXTERNAL_PROTOCOLS.has(parsed.protocol)) {
-        void shell.openExternal(url);
-      }
-    } catch {
-      // 잘못된 URL — 무시
-    }
-  });
+  // P7-1: silent ignore → 명시 reject + console.warn (비허용 protocol 시)
+  ipcMain.handle(API_OPEN_EXTERNAL, (_event, url: string) =>
+    handleOpenExternal(url),
+  );
 
   // api:getTheme — 현재 resolved 테마 반환 (invoke)
   ipcMain.handle(API_GET_THEME, () => getCurrentTheme());
+
+  // api:getWindowId — preload에서 sendSync로 호출, BrowserWindow.id를 동기 반환 (P7-10)
+  // ipcMain.handle(async)이 아닌 ipcMain.on + event.returnValue를 사용해야 sendSync 응답 가능
+  ipcMain.on(API_GET_WINDOW_ID, (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    event.returnValue = win?.id ?? -1;
+  });
 
   // nativeTheme.updated → 모든 BrowserWindow에 broadcast (app 수명 단일 등록)
   const disposeThemeWatch = watchTheme((payload: ThemeUpdatePayload) => {
     broadcastThemeUpdate(payload);
   });
 
-  return disposeThemeWatch;
+  return () => {
+    disposeThemeWatch();
+    ipcMain.removeHandler(API_OPEN_FILE);
+    ipcMain.removeHandler(API_READ_FILE);
+    ipcMain.removeHandler(API_OPEN_EXTERNAL);
+    ipcMain.removeHandler(API_GET_THEME);
+    ipcMain.removeAllListeners(API_GET_WINDOW_ID);
+  };
 }
 
 /**

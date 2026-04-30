@@ -37,6 +37,20 @@ export class DocumentWindowManager {
   }
 
   /**
+   * windowId(BrowserWindow.id 숫자)로 baseDir를 조회한다.
+   * asset-protocol이 URL의 windowId → baseDir 조회에 사용한다 (P2-7).
+   * 미등록 또는 close 후 삭제된 경우 undefined 반환.
+   */
+  getBaseDirById(windowId: number): string | undefined {
+    for (const entry of this.entries.values()) {
+      if (!entry.window.isDestroyed() && entry.window.id === windowId) {
+        return entry.baseDir;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * 윈도우의 baseDir를 갱신한다.
    * setDocument 시점에 path.dirname(filePath)로 호출된다.
    */

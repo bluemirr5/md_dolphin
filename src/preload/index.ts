@@ -9,6 +9,7 @@ import {
   API_DOCUMENT_OPENED,
   API_GET_THEME,
   API_THEME_UPDATED,
+  API_GET_WINDOW_ID,
 } from '@shared/ipc-channels';
 import type { OpenedFileResult } from '../main/file-service';
 import type { RenderingTheme, ThemeUpdatePayload } from '@shared/theme-types';
@@ -72,6 +73,13 @@ const api = {
       ipcRenderer.removeListener(API_THEME_UPDATED, handler);
     };
   },
+
+  /**
+   * 현재 BrowserWindow의 id를 반환한다.
+   * mddolphin-asset:// 프로토콜 핸들러가 windowId로 baseDir를 조회할 때 사용 (P7-10).
+   * sendSync — preload 초기화 시점에 main process에서 동기 조회 (sandbox 친화적).
+   */
+  windowId: ipcRenderer.sendSync(API_GET_WINDOW_ID) as number,
 } as const;
 
 try {

@@ -13,6 +13,8 @@ import './styles/theme.css';
 import './styles/typography.css';
 import './styles/gfm.css';
 import './styles/codeblock.css';
+import './styles/blockquote.css';
+import './styles/image.css';
 
 // 빈 문서 — 파일 미로드 시 안내 메시지 표시용
 const EMPTY_HINT_TEXT = `\
@@ -23,31 +25,35 @@ const EMPTY_HINT_TEXT = `\
 - **⌘O** — 파일 열기 다이얼로그
 - **드래그 & 드롭** — 마크다운 파일을 이 창에 드롭
 
-## 코드 블록 미리보기 (사이클 6)
+## 이미지 미리보기 (사이클 7)
+
+![원격 이미지 예시](https://via.placeholder.com/320x180?text=Remote+Image)
+
+## 인용문 (사이클 7)
+
+> 좌측 accent bar가 있는 인용문입니다.
+>
+> > 중첩 인용문 — 들여쓰기 누적
+
+## 외부 링크 (사이클 7)
+
+[GitHub](https://github.com) — 클릭 시 시스템 브라우저로 열림. hover 시 URL 툴팁.
+
+## 코드·GFM (사이클 5·6)
 
 \`\`\`typescript
 const greeting: string = "안녕하세요";
 console.log(greeting);
 \`\`\`
 
-\`\`\`python
-def hello(name: str) -> str:
-    return f"Hello, {name}"
-\`\`\`
-
-\`\`\`
-plain text without language
-\`\`\`
-
-## GFM 미리보기 (사이클 5)
-
 | 기능 | 상태 |
 |:-----|:----:|
 | 표 | ✅ |
-| 체크박스 | ✅ |
+| 인용문 | ✅ |
 
 - [x] 사이클 5 GFM
-- [ ] 사이클 6 shiki
+- [x] 사이클 6 shiki
+- [x] 사이클 7 image/link/quote
 `;
 
 const EMPTY_DOCUMENT = parseMarkdown(EMPTY_HINT_TEXT, undefined);

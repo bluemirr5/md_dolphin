@@ -19,24 +19,24 @@ export function installSessionSecurity(session: Session, isDev: boolean): void {
   });
 
   // 모든 응답에 CSP 헤더를 주입한다.
-  // dev: Vite HMR을 위해 localhost 스크립트·eval·inline 허용. prod: script-src 'none'.
+  // dev: Vite HMR을 위해 localhost 스크립트·eval·inline 허용. prod: 최소 허용.
   // 사이클 7에서 mddolphin-asset:// 허용으로 강화.
+  // P7-11: default-src 'none'으로 통일 (meta CSP와 동기화)
   const scriptSrc = isDev
     ? "script-src 'self' http://localhost:* 'unsafe-eval' 'unsafe-inline'"
     : "script-src 'self'";
-  const styleSrc = isDev
-    ? "style-src 'self' 'unsafe-inline'"
-    : "style-src 'self' 'unsafe-inline'";
   const connectSrc = isDev
     ? "connect-src 'self' ws://localhost:* http://localhost:*"
     : "connect-src 'none'";
 
+  // 사이클 7: img-src에 mddolphin-asset: 추가 (로컬 자산 custom protocol 허용)
+  // data: 는 raster prefix만 — JS 수준 검증은 Image.tsx에서 수행 (4.4.1 이중방어)
   session.webRequest.onHeadersReceived((details, callback) => {
     callback({
       responseHeaders: {
         ...details.responseHeaders,
         'Content-Security-Policy': [
-          `default-src 'none'; ${scriptSrc}; ${styleSrc}; img-src 'self' data:; font-src 'self'; ${connectSrc}`,
+          `default-src 'none'; ${scriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: mddolphin-asset:; font-src 'self'; ${connectSrc}; object-src 'none'; base-uri 'self'`,
         ],
       },
     });

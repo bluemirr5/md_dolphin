@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { highlightCode } from '../shiki';
+import { sanitizeShikiHtml } from '../sanitize';
 
 // AC9: props는 사이클 2 인터페이스 동결 — 내부 상태만 추가 (설계 제약)
 interface CodeBlockProps {
@@ -18,7 +19,8 @@ export function CodeBlock({ code, language }: CodeBlockProps): JSX.Element {
 
     void highlightCode(code, language).then((html) => {
       if (mounted) {
-        setShikiHtml(html);
+        // P2-2: shiki 출력 sanitize — dangerouslySetInnerHTML 직전 1회 적용
+        setShikiHtml(html !== null ? sanitizeShikiHtml(html) : null);
       }
     });
 

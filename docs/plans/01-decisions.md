@@ -187,7 +187,7 @@ Phase 2 확장:
 | 외부 링크                     | `shell.openExternal(url)`로 위임 — 앱 내부 webview 이동 차단                                                                                  |
 | 마크다운 내 HTML              | **markdown-it `html: false`로 시작** (결정 14). DOMPurify는 사용자가 allowlist 확장 시 의무 적용. `<script>`, `on*` 속성, `style` 속성 strip. |
 | 로컬 이미지 접근              | custom protocol (`mddolphin-asset://`) — 4.4.2의 화이트리스트 정책 의무 적용                                                                  |
-| CSP (Content-Security-Policy) | `default-src 'self'; img-src 'self' https: data: mddolphin-asset:; style-src 'self' 'unsafe-inline'; script-src 'self'` (4.4.1 결정 근거)     |
+| CSP (Content-Security-Policy) | **`default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: mddolphin-asset:; font-src 'self'; connect-src 'none'(prod); object-src 'none'; base-uri 'self'`** (P7-11, 사이클 7 적용) |
 | CSP 적용 위치                 | **`<meta>` + `session.webRequest.onHeadersReceived` 이중방어** (4.4.1)                                                                        |
 | IPC 메시지                    | 모든 IPC 채널에 대해 main 측 입력 검증 (path traversal 방지). `SAFE_EXTERNAL_PROTOCOLS` 상수는 `src/main/security.ts`에서 단일 정의 후 export (사이클 3에서 중복 제거됨, P3-1) |
 
@@ -217,33 +217,31 @@ Phase 2 확장:
 
 **Phase 2 강화 계획**: 옵션 (B) — shiki nonce화. Phase 2 진입 시 별도 사이클로 분리. 결정 게이트 통과 후 첫 보안 강화 항목.
 
-**이중방어**:
+**이중방어 (P7-11 사이클 7 확정)**:
 
-- CSP는 `index.html`의 `<meta http-equiv="Content-Security-Policy">`로 1차 적용.
-- **`session.defaultSession.webRequest.onHeadersReceived`로 응답 헤더에도 동일 CSP 적용**(이중방어). custom protocol 응답에 CSP 헤더가 누락되는 사례를 차단.
+- **src/renderer/index.html** 메타 태그: `default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: mddolphin-asset:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'`
+- **src/main/security.ts** `session.webRequest.onHeadersReceived` 헤더 주입: 동일 CSP (custom protocol + dev 환경 HMR 조건 추가)
+- **DOMPurify 통합 (사이클 7 적용)**: `src/renderer/src/markdown/sanitize.ts`에서 shiki 출력 전 style 속성 화이트리스트(shiki 이중 변수 `--shiki-light`/`--shiki-dark` 및 `color`만 허용, 색상값 정규식 검증 후 통과).
 
-**사이클 7 spec 의무 항목**:
-
-- DOMPurify 설정에 `FORBID_ATTR: ['style']` 또는 동등 효과 옵션 명시.
-- 마크다운 인라인 HTML이 활성화될 때(`html: true`로 변경 시) DOMPurify가 즉시 적용되는지 검증.
-
-#### 4.4.2 로컬 자산 접근 정책 (P2-7 반영)
+#### 4.4.2 로컬 자산 접근 정책 (P2-7 반영, P7-5 사이클 7 적용)
 
 로컬 이미지·첨부를 `mddolphin-asset://` custom protocol로 노출할 때, **현재 문서의 base directory 화이트리스트** 외부 경로는 거부한다.
 
 **정책**:
 
 1. **base directory**: 현재 윈도우가 보유한 `MarkdownDocument.url`의 디렉토리. 윈도우 단위로 보유.
-2. **요청 검증**: protocol 핸들러에서 요청된 파일 경로를 `path.resolve`로 정규화한 뒤,
+2. **URL 구조 (P7-5 사이클 7)**: `mddolphin-asset://<windowId>/<relPath>`. windowId는 BrowserWindow id(숫자). `registerBaseDir(windowId, dir)` 호출로 등록.
+3. **요청 검증**: protocol 핸들러에서 요청된 파일 경로를 `path.resolve`로 정규화한 뒤,
    - `path.relative(baseDir, requestedPath)` 결과가 `..`로 시작하면 **거부**.
    - 절대 경로가 baseDir 외부면 **거부**.
-3. **symlink 정책**: `fs.realpath`로 해석한 결과가 baseDir 외부면 **거부**(symlink 경유 traversal 차단).
-4. **확장자 화이트리스트**: 이미지(`.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`, `.svg`)만 1차 허용. 그 외는 거부. SVG는 향후 XSS 우려로 추가 sanitize 검토.
+4. **symlink 정책**: `fs.realpath`로 해석한 결과가 baseDir 외부면 **거부**(symlink 경유 traversal 차단).
+5. **MIME 검증**: 이미지 raster 4종(`image/png`, `image/jpeg`, `image/gif`, `image/webp`)만 허용. SVG/다른 타입 거부. **향후 (사이클 9) DOMPurify SVG sanitize profile 도입 후 SVG 화이트리스트 추가 예정 (P7-3)**.
+6. **Phase 2 부채 (P7-5)**: 다중 윈도우 도입 시 windowId를 opaque token(예: UUID)으로 전환. 현재 BrowserWindow id는 숫자로 추측 가능하지만 baseDir 등록·검증으로 권한 승인.
 
 **사이클 spec 의무 항목**:
 
 - **사이클 3 spec**: "현재 문서의 base directory를 윈도우 단위로 보유" — `DocumentWindow` 또는 동등 객체에 `baseDir: string` 필드.
-- **사이클 7 spec**: protocol 핸들러 등록 시 `baseDir` 인자 받아 위 검증 로직 적용. 단위 테스트로 traversal 케이스 회귀.
+- **사이클 7 spec**: protocol 핸들러(`src/main/asset-protocol.ts`) 등록 시 `baseDir` 인자 받아 위 검증 로직 적용. 단위 테스트로 traversal, MIME, close race 케이스 회귀.
 
 ### 4.5 상태 관리 — Zustand (이전 SwiftUI Observation의 대응)
 

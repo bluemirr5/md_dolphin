@@ -36,5 +36,7 @@ interface Window {
     readonly onDocumentOpened: (callback: (filePath: string) => void) => () => void;
     readonly getTheme: () => Promise<RenderingTheme>;
     readonly watchTheme: (callback: (payload: ThemeUpdatePayload) => void) => () => void;
+    /** 현재 BrowserWindow의 id — mddolphin-asset:// 프로토콜 baseDir 조회에 사용 (P7-10) */
+    readonly windowId: number;
   };
 }

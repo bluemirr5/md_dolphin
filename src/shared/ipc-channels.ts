@@ -19,3 +19,6 @@ export const API_GET_THEME = 'api:getTheme' as const;
 
 /** main → renderer: 테마 변경 push (on) — nativeTheme.updated 이벤트 기반 */
 export const API_THEME_UPDATED = 'api:themeUpdated' as const;
+
+/** renderer → main: 현재 윈도우 id 동기 조회 (sendSync) — P7-10 windowId 주입 */
+export const API_GET_WINDOW_ID = 'api:getWindowId' as const;

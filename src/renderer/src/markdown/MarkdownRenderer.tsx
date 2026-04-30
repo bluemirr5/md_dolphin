@@ -12,7 +12,10 @@ import { Strikethrough } from './nodes/Strikethrough';
 import { Table, Thead, Tbody, Tr, Th, Td, textAlignToClassName } from './nodes/Table';
 import { UnorderedList, OrderedList } from './nodes/List';
 import { ListItem } from './nodes/ListItem';
+import { Image } from './nodes/Image';
+import { Blockquote } from './nodes/Blockquote';
 // 사이클 5: Table, List, ListItem, Strikethrough 신규 도입
+// 사이클 7: Image, Blockquote 신규 도입
 
 // 내부 블록 표현 — 외부 미노출 (사이클 9 react-virtuoso 교체 용이성 확보)
 interface Block {
@@ -110,6 +113,20 @@ function renderInlineTokens(tokens: readonly Token[], keyPrefix: string): ReactN
         );
       }
       // checkbox가 아닌 html_inline은 html:false이므로 무시 (보안)
+    } else if (token.type === 'image') {
+      // 인라인 이미지 — src/alt/title 추출 후 Image 컴포넌트로 렌더
+      const src = token.attrGet('src') ?? '';
+      const alt = token.children
+        ?.filter((t) => t.type === 'text')
+        .map((t) => t.content)
+        .join('') ?? '';
+      const titleAttr = token.attrGet('title');
+      const imgProps = titleAttr !== null
+        ? { src, alt, title: titleAttr }
+        : { src, alt };
+      nodes.push(
+        <Image key={`${keyPrefix}-image-${i}`} {...imgProps} />,
+      );
     }
 
     i++;
@@ -365,6 +382,60 @@ function renderTbodyTokens(
   return { element: <Tbody key={`${blockKey}-tbody`}>{rows}</Tbody>, endIndex: i };
 }
 
+// blockquote 토큰 범위를 찾아 ReactNode를 반환 (재귀 지원 — 중첩 blockquote)
+function renderBlockquoteTokens(
+  tokens: readonly Token[],
+  startIndex: number, // blockquote_open 인덱스
+  blockKey: string,
+): { element: ReactNode; endIndex: number } {
+  let i = startIndex + 1;
+  const children: ReactNode[] = [];
+  let childIndex = 0;
+
+  while (i < tokens.length) {
+    const token = tokens[i];
+    if (!token) { i++; continue; }
+
+    if (token.type === 'blockquote_close') break;
+
+    const childKey = `${blockKey}-bq-${childIndex++}`;
+
+    if (token.type === 'paragraph_open') {
+      const inlineToken = tokens[i + 1];
+      const nodes =
+        inlineToken?.type === 'inline'
+          ? renderInlineTokens(inlineToken.children ?? [], childKey)
+          : null;
+      children.push(<Paragraph key={childKey}>{nodes}</Paragraph>);
+      i += 2; // inline + paragraph_close
+    } else if (token.type === 'blockquote_open') {
+      // 중첩 blockquote — 재귀
+      const nested = renderBlockquoteTokens(tokens, i, childKey);
+      children.push(nested.element);
+      i = nested.endIndex;
+    } else if (token.type === 'bullet_list_open' || token.type === 'ordered_list_open') {
+      const nested = renderListTokens(tokens, i, childKey);
+      children.push(nested.element);
+      i = nested.endIndex;
+    }
+
+    i++;
+  }
+
+  return {
+    element: <Blockquote key={blockKey}>{children}</Blockquote>,
+    endIndex: i,
+  };
+}
+
+// inline 토큰 배열에서 첫 번째 image 토큰을 찾는다
+function findImageToken(tokens: readonly Token[]): Token | null {
+  for (const token of tokens) {
+    if (token.type === 'image') return token;
+  }
+  return null;
+}
+
 // 토큰 스트림에서 Block 배열을 생성 (내부 전용 — renderTokensToReact와 동일 역할)
 function tokenStreamToBlocks(tokens: readonly Token[]): readonly Block[] {
   const blocks: Block[] = [];
@@ -435,8 +506,32 @@ function tokenStreamToBlocks(tokens: readonly Token[]): readonly Block[] {
       const result = renderTableTokens(tokens, i, key);
       blocks.push({ kind: 'table', key, element: result.element });
       i = result.endIndex;
+    } else if (token.type === 'blockquote_open') {
+      // blockquote_open ... blockquote_close — renderBlockquoteTokens가 소비
+      const result = renderBlockquoteTokens(tokens, i, key);
+      blocks.push({ kind: 'blockquote', key, element: result.element });
+      i = result.endIndex;
+    } else if (token.type === 'inline') {
+      // 블록 수준 inline 토큰 — image 토큰이 포함될 수 있음
+      const imageToken = findImageToken(token.children ?? []);
+      if (imageToken !== null) {
+        const src = imageToken.attrGet('src') ?? '';
+        const alt = imageToken.children
+          ?.filter((t) => t.type === 'text')
+          .map((t) => t.content)
+          .join('') ?? '';
+        const titleAttr = imageToken.attrGet('title');
+        const imageProps = titleAttr !== null
+          ? { src, alt, title: titleAttr }
+          : { src, alt };
+        blocks.push({
+          kind: 'image',
+          key,
+          element: <Image key={key} {...imageProps} />,
+        });
+      }
     }
-    // blockquote, hr, html_block 등은 사이클 7
+    // hr, html_block 등은 사이클 9+
   }
 
   return blocks;

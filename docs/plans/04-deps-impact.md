@@ -23,7 +23,8 @@
 | **Universal Binary 빌드 시간 (P2-10)**                          | 중         | 사이클 11a                          | macos-14 러너에서 `time pnpm dist` 측정. 30분 초과 시 arm64 우선 릴리스 옵션.                                                                    |
 | **Mermaid+KaTeX 동시 도입 시 파서 전환 비용 (P2-6)**            | 낮음(현재) | Phase 2 진입 시점                   | 4.2.2 의사결정 룰 적용. 단독이면 markdown-it 유지, 동시면 remark 검토.                                                                           |
 | **vitest worker pool OOM** (사이클 5 발견)                      | 낮음       | 사이클 9                            | 현재 `NODE_OPTIONS='--max-old-space-size=4096'`으로 회피. 테스트 인프라 개선은 사이클 9 성능 검증 시 재평가.                                    |
-| **markdown-it-task-lists html_inline 우회 패턴** (사이클 5)     | 낮음       | 사이클 6 발견, 사이클 7 (DOMPurify) | 현재 `html: false`에서 html_inline 토큰을 React `<input>`으로 수동 변환. 사이클 6 부채 ④ `docs/notes/cycle-06-html-inline-review.md` 작성 완료. 사이클 7 DOMPurify 도입 시 `html_inline` 처리 정책과 충돌 여부 재확인 + allowlist에 `<span style>` shiki 출력 통과 의무. |
+| **markdown-it-task-lists html_inline 우회 패턴** (사이클 5)     | 낮음       | **사이클 7 해소** | `html: false` 정책 하에서 html_inline 토큰을 React `<input>`으로 수동 변환하는 패턴 유지. 사이클 6 부채 ④ `docs/notes/cycle-06-html-inline-review.md` 검토 결과 적용: DOMPurify allowlist에 `<span style>` shiki 출력(--shiki-light/dark, color) 화이트리스트 함수 도입으로 해소. P7-2 shiki style allowlist 정규식→함수형 전환. |
+| **blockquote inline 단독 토큰 처리** (사이클 7) | 매우낮음   | 미정 | 현 markdown-it CommonMark 설정에서 `blockquote_open` 없이 `inline` 토큰 단독으로 오는 경우 미발생. 파서 전환(remark 등) 또는 markdown-it 설정 변경 시 재점검. 사이클 7에서 실제 발생하지 않았으므로 미룬 것 노트만 유지(CR7-12). |
 | **gfm.css 표 색상 대비** (사이클 5 발견)                         | 매우낮음   | 사이클 6 검토 완료, 사이클 9~10 (강화)           | 라이트 모드에서 표 테두리(`--quote-bar`) vs 짝수 행(`--code-bg`)의 색상 대비 일부 미세 손실. 신규 CSS 변수 금지 제약(사이클 4 토큰 동결) 때문에 사이클 5에서는 수정 불가. 사이클 6 부채 ⑤에서 재검토: WCAG AA 4.5:1 대비 만족 + 커스텀 라이트 테마(`light-soft`) 도입 시 해소 계획. 사이클 9~10 토큰 재검토 시 신규 변수 추가 검토. |
 
 ---
@@ -35,7 +36,7 @@
 | **Electron** (Chromium + Node)   | 앱 자체                                    | Tauri로 마이그레이션 가능 (대규모 작업). 실패 가능성 매우 낮음.                           |
 | **markdown-it**                  | 파싱 전면                                  | remark/rehype 또는 micromark로 대체 가능. 토큰 변환 어댑터만 교체. 비용은 4.2.2.          |
 | **shiki**                        | 코드 색상 표현 손실                        | Prism.js 또는 highlight.js로 대체 가능.                                                   |
-| **DOMPurify / sanitize-html**    | XSS 방어 손실 — 보안 치명적                | 둘 중 하나 의무 사용. 둘 다 활성 유지보수.                                                |
+| **DOMPurify@3.4.1** (사이클 7) / sanitize-html | XSS 방어 손실 — 보안 치명적                | 사이클 7부터 DOMPurify 도입. 자체 `.d.ts` 동봉이라 `@types/dompurify` 불요. 둘 다 활성 유지보수. |
 | **react-virtuoso**               | 큰 파일 성능 저하                          | `react-window` 또는 자체 가상화 구현                                                      |
 | **Pretendard 폰트** (OFL)        | 폰트 누락 시 시스템 폰트 fallback          | Apple SD Gothic Neo로 우아하게 대체                                                       |
 | **i18next**                      | 다국어 손실                                | react-intl로 대체 가능                                                                    |

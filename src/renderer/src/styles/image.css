@@ -1,0 +1,119 @@
+/* image.css — 이미지·라이트박스 스타일 (사이클 7) */
+
+/* figure/figcaption */
+.md-image {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0.75em 0;
+  max-width: 100%;
+}
+
+.md-image__img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  cursor: pointer;
+  display: block;
+}
+
+.md-image__img:hover {
+  opacity: 0.9;
+}
+
+.md-image__caption {
+  margin-top: 0.375em;
+  font-size: 0.875em;
+  /* --text-muted 미정의: color-mix로 직접 계산 (사이클 4 토큰 동결, P7-12) */
+  color: color-mix(in srgb, var(--text, #1A1A1A) 60%, transparent);
+  text-align: center;
+}
+
+/* 로드 실패 alt 폴백 */
+.md-image__fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5em 1em;
+  /* --border 미정의: fallback 색상 직접 인라인 (라이트: #d1d1d6, 다크는 code-bg 톤 참고) */
+  border: 1px dashed #d1d1d6;
+  border-radius: 4px;
+  font-size: 0.875em;
+  color: color-mix(in srgb, var(--text, #1A1A1A) 70%, transparent);
+}
+
+/* 라이트박스 오버레이 */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  /* 포커스 트랩을 위해 outline 제거 */
+  outline: none;
+}
+
+.lightbox-image {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s;
+}
+
+.lightbox-close:hover,
+.lightbox-close:focus {
+  background-color: rgba(255, 255, 255, 0.3);
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+/* 외부 링크 툴팁 */
+.md-link--external {
+  position: relative;
+}
+
+.md-link--external::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  padding: 0.25em 0.5em;
+  /* --surface-elevated, --text-on-elevated 미정의: fallback rgba 직접 인라인 (P7-12) */
+  background-color: rgba(51, 51, 51, 0.92);
+  color: #ffffff;
+  font-size: 0.75em;
+  border-radius: 4px;
+  white-space: nowrap;
+  max-width: 20em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 100;
+}
+
+.md-link--external:hover::after,
+.md-link--external:focus::after {
+  opacity: 1;
+}
