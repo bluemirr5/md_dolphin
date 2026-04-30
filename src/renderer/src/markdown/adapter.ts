@@ -1,13 +1,25 @@
 import MarkdownIt from 'markdown-it';
 import type Token from 'markdown-it/lib/token.mjs';
-import type { Options as MarkdownItOptions } from 'markdown-it';
+import type { Options as MarkdownItOptions, PluginWithOptions } from 'markdown-it';
+import _taskListsPlugin from 'markdown-it-task-lists';
 import type { MarkdownDocument } from '@shared/markdown/document';
 import type { Heading, HeadingLevel, Outline, OutlineNode } from '@shared/markdown/heading';
 
+// markdown-it-task-lists에는 @types 패키지가 없음.
+// declare module 선언만으로는 typescript-eslint가 plugin 시그니처를 추론하지 못해
+// PluginWithOptions<TaskListOptions>로 캐스팅 (타입 정보 손실 최소)
+interface TaskListOptions {
+  enabled: boolean;
+  label: boolean;
+}
+const markdownItTaskLists = _taskListsPlugin as unknown as PluginWithOptions<TaskListOptions>;
+
 // markdown-it 파싱 옵션 — 사이클 7 DOMPurify 없이 allowlist 확장 불가하므로 고정
+// linkify: true는 사이클 5에서 추가 (bare URL autolink 지원)
+// html: false — P2-8 의무 동결, typographer: false 유지 (사이클 9~10)
 const MD_OPTIONS: MarkdownItOptions = {
   html: false,
-  linkify: false,
+  linkify: true,
   typographer: false,
 };
 
@@ -148,7 +160,8 @@ export function parseMarkdown(
   }
 
   // 호출 단위로 인스턴스 생성 — 모듈 싱글턴 금지 (사이클 5 GFM .use() 전역 오염 방지)
-  const md = new MarkdownIt(MD_OPTIONS);
+  // enabled:false → input disabled (편집 차단), label:false → label 래핑 비활성
+  const md = new MarkdownIt(MD_OPTIONS).use(markdownItTaskLists, { enabled: false, label: false });
   const tokens = md.parse(rawText, {});
 
   const lineOffsets = buildLineOffsets(rawText);
@@ -163,6 +176,6 @@ export function parseMarkdown(
 // 외부로 export하지 않음 (외부 API는 parseMarkdown만)
 export function renderTokens(rawText: string): readonly Token[] {
   if (rawText.trim() === '') return [];
-  const md = new MarkdownIt(MD_OPTIONS);
+  const md = new MarkdownIt(MD_OPTIONS).use(markdownItTaskLists, { enabled: false, label: false });
   return md.parse(rawText, {});
 }

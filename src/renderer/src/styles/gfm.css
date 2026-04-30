@@ -1,0 +1,73 @@
+/* gfm.css — GFM 요소 스타일 (사이클 5)
+ * 설계 제약: CSS 변수 --bg/--text/--quote-bar/--code-bg만 재사용 (사이클 4 토큰, 신규 변수 금지)
+ * CSP style-src 동결 정책: inline style 금지, className(align-*)으로 정렬 표현 */
+
+/* ===== 표 (Table) ===== */
+.md-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1.2em;
+  font-size: 0.95em;
+}
+
+.md-content th,
+.md-content td {
+  border: 1px solid var(--code-bg);
+  padding: 0.5em 0.75em;
+  text-align: left;
+}
+
+.md-content thead th {
+  background-color: var(--code-bg);
+  font-weight: 600;
+}
+
+.md-content tbody tr:nth-child(even) {
+  background-color: var(--bg);
+}
+
+/* 정렬 className 3종 — th_open/td_open attrs[style=text-align:*] 파싱 결과 */
+.md-content .align-left {
+  text-align: left;
+}
+
+.md-content .align-center {
+  text-align: center;
+}
+
+.md-content .align-right {
+  text-align: right;
+}
+
+/* ===== 취소선 (Strikethrough) ===== */
+.md-content del {
+  /* opacity로 del 색상 표현 — --text opacity 사용 (신규 변수 금지) */
+  color: var(--text);
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+/* ===== 리스트 (List / ListItem) ===== */
+.md-content ul,
+.md-content ol {
+  padding-left: 1.5em;
+  margin-bottom: 1.2em;
+}
+
+.md-content li {
+  margin-bottom: 0.3em;
+  line-height: 1.7;
+}
+
+/* task-list-item: marker 숨김, input 줄간격 */
+.md-content li.task-list-item {
+  list-style: none;
+  margin-left: -1.5em;
+  padding-left: 1.5em;
+}
+
+.md-content li.task-list-item input[type='checkbox'] {
+  margin-right: 0.4em;
+  vertical-align: middle;
+  cursor: default;
+}
