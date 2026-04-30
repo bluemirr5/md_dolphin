@@ -54,6 +54,7 @@
 | 2026-04-29     | planner       | **자체 검증** (P2 라운드)                            | "P2 라운드 반영 완료" 마킹. CTO 관점에 P2 흡수 결과 추가.                                                                                            |
 | **2026-04-30** | **user**      | **사이클 5 종료 후 부채 메모**                       | 사이클 5(GFM) 코드 리뷰에서 발견된 사이클 2 잔존 결함을 사이클 6 표(7.1)에 끼워넣음: ① `MarkdownRenderer.tsx`의 `strong_open`/`em_open` 인라인 처리가 text 토큰만 추출 → `**[link](url)**` 등 중첩 마크업 손실, `renderInlineTokens` 재귀로 통일 ② `adapter.ts`의 `renderTokens` export 제거(사이클 2 동결 "외부 API는 `parseMarkdown`만" 위반 해소). |
 | **2026-04-30** | **doc-writer** | **사이클 5 완료 마킹 + 미메모 항목 기록** | 벤치마크 문서 및 스펙 작성 완료(cycle-05-gfm.md 115줄, cycle-05-gfm-regression.md). AC7 합격: p50 5.08ms ≤ 5초. 사이클 6 항목에 추가: ③ App.tsx EMPTY_HINT_TEXT 데모 정리 ④ html_inline 우회 패턴(사이클 7 DOMPurify 정책 재검토) ⑤ gfm.css 표 색상 대비 미세 손실(사이클 9~10 다듬기). |
+| **2026-04-30** | **doc-writer** | **사이클 6 완료 마킹** | shiki 1.29.2 통합 + 부채 5항목 정리 + 162 tests + WeakMap 캐시 P6-1 흡수 + 회귀 6.25ms 합격. `docs/plans/03-cycles.md` 6.1 사이클 표와 `docs/plans/01-decisions.md` 4.2.3 트레이드오프 갱신 의무. |
 | **2026-04-30** | **planner** | **마스터 플랜 다중 파일 분할** | 단일 파일 1140줄 → 8개 파일 분할 (`README.md` 인덱스 + `00-vision.md`/`01-decisions.md`/`02-design-tokens.md`/`03-cycles.md`/`04-deps-impact.md`/`05-changelog.md`/`06-validation.md`). sub-agent별 read 부담 절감 + cross-reference 코드 매핑 표 인덱스에 정착. 절 번호(0.1, 4.4.2, 6.1 등) 원본 유지로 기존 spec의 cross-ref 인용 호환 유지. |
 
 ### 0.2 사이클 1 진입 게이트 (P2-1 반영)

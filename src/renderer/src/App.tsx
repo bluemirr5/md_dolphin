@@ -12,6 +12,7 @@ import type { DocumentData } from './store/document-store';
 import './styles/theme.css';
 import './styles/typography.css';
 import './styles/gfm.css';
+import './styles/codeblock.css';
 
 // 빈 문서 — 파일 미로드 시 안내 메시지 표시용
 const EMPTY_HINT_TEXT = `\
@@ -22,19 +23,31 @@ const EMPTY_HINT_TEXT = `\
 - **⌘O** — 파일 열기 다이얼로그
 - **드래그 & 드롭** — 마크다운 파일을 이 창에 드롭
 
+## 코드 블록 미리보기 (사이클 6)
+
+\`\`\`typescript
+const greeting: string = "안녕하세요";
+console.log(greeting);
+\`\`\`
+
+\`\`\`python
+def hello(name: str) -> str:
+    return f"Hello, {name}"
+\`\`\`
+
+\`\`\`
+plain text without language
+\`\`\`
+
 ## GFM 미리보기 (사이클 5)
 
-| 기능 | 상태 | 비고 |
-|:-----|:----:|-----:|
-| 표 렌더링 | ✅ | 정렬 3종 |
-| 체크박스 | ✅ | disabled |
-| 취소선 | ✅ | \`~~text~~\` |
+| 기능 | 상태 |
+|:-----|:----:|
+| 표 | ✅ |
+| 체크박스 | ✅ |
 
-- [x] 표 (Table) 렌더링
-- [x] 취소선 ~~strikethrough~~
-- [ ] 사이클 6: shiki 하이라이팅
-
-autolink: https://github.com/markdown-it/markdown-it
+- [x] 사이클 5 GFM
+- [ ] 사이클 6 shiki
 `;
 
 const EMPTY_DOCUMENT = parseMarkdown(EMPTY_HINT_TEXT, undefined);

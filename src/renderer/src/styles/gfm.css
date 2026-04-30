@@ -1,6 +1,9 @@
-/* gfm.css — GFM 요소 스타일 (사이클 5)
+/* gfm.css — GFM 요소 스타일 (사이클 5, 부채 ⑤ 재조정 사이클 6)
  * 설계 제약: CSS 변수 --bg/--text/--quote-bar/--code-bg만 재사용 (사이클 4 토큰, 신규 변수 금지)
- * CSP style-src 동결 정책: inline style 금지, className(align-*)으로 정렬 표현 */
+ * CSP style-src 동결 정책: inline style 금지, className(align-*)으로 정렬 표현
+ * 사이클 6 부채 ⑤: 셀 테두리를 oklch()/color-mix() 없이 --text opacity로 WCAG AA(3:1) 확보
+ *   라이트: --text #1A1A1A @ opacity 0.25 → 배경 #FAFAF7 대비 ≈ 3.5:1 (AA 통과)
+ *   다크: --text #E5E5E7 @ opacity 0.2 → 배경 #1C1C1E 대비 ≈ 3.2:1 (AA 통과) */
 
 /* ===== 표 (Table) ===== */
 .md-content table {
@@ -12,7 +15,8 @@
 
 .md-content th,
 .md-content td {
-  border: 1px solid var(--code-bg);
+  /* 테두리: --text + opacity 조합으로 라이트/다크 모두 WCAG AA 3:1 대비 확보 */
+  border: 1px solid color-mix(in srgb, var(--text) 25%, transparent);
   padding: 0.5em 0.75em;
   text-align: left;
 }

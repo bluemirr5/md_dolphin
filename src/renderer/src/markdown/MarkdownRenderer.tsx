@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type Token from 'markdown-it/lib/token.mjs';
 import type { MarkdownDocument } from '@shared/markdown/document';
 import type { HeadingLevel } from '@shared/markdown/heading';
-import { renderTokens } from './adapter';
+import { getCachedTokens } from './adapter';
 import { HeadingNode } from './nodes/Heading';
 import { Paragraph } from './nodes/Paragraph';
 import { Link } from './nodes/Link';
@@ -69,6 +69,8 @@ function renderInlineTokens(tokens: readonly Token[], keyPrefix: string): ReactN
         </Link>,
       );
     } else if (token.type === 'strong_open' || token.type === 'em_open') {
+      // strong_open/em_open — s_open과 동일 재귀 패턴으로 통일 (부채 ①)
+      // text 단순 추출이었던 이전 구현은 **[link](url)** 등 중첩 마크업 손실 유발
       const Tag = token.type === 'strong_open' ? 'strong' : 'em';
       const innerTokens: Token[] = [];
       const closeType = token.type === 'strong_open' ? 'strong_close' : 'em_close';
@@ -78,11 +80,8 @@ function renderInlineTokens(tokens: readonly Token[], keyPrefix: string): ReactN
         if (t) innerTokens.push(t);
         i++;
       }
-      const text = innerTokens
-        .filter((t) => t.type === 'text')
-        .map((t) => t.content)
-        .join('');
-      nodes.push(<Tag key={`${keyPrefix}-em-${i}`}>{text}</Tag>);
+      const innerNodes = renderInlineTokens(innerTokens, `${keyPrefix}-${Tag}-${i}`);
+      nodes.push(<Tag key={`${keyPrefix}-${Tag}-${i}`}>{innerNodes}</Tag>);
     } else if (token.type === 's_open') {
       // ~~strikethrough~~ — s_open ... s_close. 내부 마크업 보존(재귀)
       const innerTokens: Token[] = [];
@@ -450,7 +449,7 @@ interface MarkdownRendererProps {
 // AC8: 빈 rawText에도 <article> wrapper 존재
 // className="md-content" — CSS 변수·타이포 토큰 스코프 (사이클 4, 설계 제약: prop 변경 없음)
 export function MarkdownRenderer({ document }: MarkdownRendererProps): JSX.Element {
-  const tokens = renderTokens(document.rawText);
+  const tokens = getCachedTokens(document);
   const blocks = tokenStreamToBlocks(tokens);
 
   return <article className="md-content">{blocks.map((b) => b.element)}</article>;

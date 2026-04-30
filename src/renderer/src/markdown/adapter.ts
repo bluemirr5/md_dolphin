@@ -23,14 +23,6 @@ const MD_OPTIONS: MarkdownItOptions = {
   typographer: false,
 };
 
-// 빈 문서 상수 — 빈 입력 시 반환
-export const EMPTY_DOCUMENT: MarkdownDocument = {
-  url: undefined,
-  rawText: '',
-  headings: [],
-  outline: { root: [] },
-};
-
 export interface ParseOptions {
   readonly baseUrl?: string;
 }
@@ -143,7 +135,16 @@ function buildOutline(headings: readonly Heading[]): Outline {
   return { root: rootList.map(toOutlineNode) };
 }
 
-// 유일한 외부 공개 API.
+// 모듈 스코프 토큰 캐시 — WeakMap으로 MarkdownDocument 수명에 연동
+// MarkdownDocument 타입 무변경 원칙 (P6-1, 마스터 플랜 4.2/4.6)
+const tokenCache = new WeakMap<MarkdownDocument, readonly Token[]>();
+
+// markdown-it 인스턴스 생성 헬퍼 — adapter.ts 내부 재사용
+function createMarkdownIt(): MarkdownIt {
+  return new MarkdownIt(MD_OPTIONS).use(markdownItTaskLists, { enabled: false, label: false });
+}
+
+// 외부 공개 API — parseMarkdown만.
 // renderTokensToReact는 내부 전용 (markdown-it 락인 제거 원칙).
 export function parseMarkdown(
   rawText: string,
@@ -151,17 +152,19 @@ export function parseMarkdown(
   _opts?: ParseOptions,
 ): MarkdownDocument {
   if (rawText.trim() === '') {
-    return {
+    const emptyDoc: MarkdownDocument = {
       url,
       rawText,
       headings: [],
       outline: { root: [] },
     };
+    tokenCache.set(emptyDoc, []);
+    return emptyDoc;
   }
 
   // 호출 단위로 인스턴스 생성 — 모듈 싱글턴 금지 (사이클 5 GFM .use() 전역 오염 방지)
   // enabled:false → input disabled (편집 차단), label:false → label 래핑 비활성
-  const md = new MarkdownIt(MD_OPTIONS).use(markdownItTaskLists, { enabled: false, label: false });
+  const md = createMarkdownIt();
   const tokens = md.parse(rawText, {});
 
   const lineOffsets = buildLineOffsets(rawText);
@@ -169,13 +172,28 @@ export function parseMarkdown(
   const headings = extractHeadings(tokens, lineOffsets, usedAnchors);
   const outline = buildOutline(headings);
 
-  return { url, rawText, headings, outline };
+  const result: MarkdownDocument = { url, rawText, headings, outline };
+  tokenCache.set(result, tokens);
+  return result;
 }
 
-// 내부 전용: MarkdownRenderer에서 사용하는 토큰 렌더링 헬퍼
-// 외부로 export하지 않음 (외부 API는 parseMarkdown만)
-export function renderTokens(rawText: string): readonly Token[] {
-  if (rawText.trim() === '') return [];
-  const md = new MarkdownIt(MD_OPTIONS).use(markdownItTaskLists, { enabled: false, label: false });
-  return md.parse(rawText, {});
+/**
+ * MarkdownDocument에 연결된 토큰 배열 반환.
+ * - parseMarkdown으로 생성된 doc: 캐시된 토큰 즉시 반환
+ * - 직접 생성된 doc (캐시 miss): rawText를 1회 파싱하여 반환 + 캐시 저장
+ * - rawText가 빈 문자열: 빈 배열 반환
+ */
+export function getCachedTokens(doc: MarkdownDocument): readonly Token[] {
+  const cached = tokenCache.get(doc);
+  if (cached !== undefined) return cached;
+
+  // 캐시 miss — fallback 파싱
+  if (doc.rawText.trim() === '') {
+    tokenCache.set(doc, []);
+    return [];
+  }
+
+  const tokens = createMarkdownIt().parse(doc.rawText, {});
+  tokenCache.set(doc, tokens);
+  return tokens;
 }

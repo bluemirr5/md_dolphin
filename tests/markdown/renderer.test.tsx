@@ -1,8 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { MarkdownRenderer } from '../../src/renderer/src/markdown/MarkdownRenderer';
 import { parseMarkdown } from '../../src/renderer/src/markdown/adapter';
 import type { MarkdownDocument } from '@shared/markdown';
+
+// shiki는 useEffect 비동기로 적용 — 동기 render 결과는 항상 plain <pre><code>
+// 명시적 mock으로 미해결 Promise 반환하여 plain fallback을 결정적으로 검증
+vi.mock('../../src/renderer/src/markdown/shiki', () => ({
+  highlightCode: vi.fn(() => new Promise(() => {})), // never resolves → plain 유지
+}));
 
 // 헬퍼: 간단한 rawText로 MarkdownDocument 생성
 function mkDoc(rawText: string): MarkdownDocument {
