@@ -1,6 +1,10 @@
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell, session } from 'electron';
 import { join } from 'node:path';
 import { isMacOS } from '@shared/platform';
+import { enableSandboxBeforeReady, installSessionSecurity } from './security';
+
+// [SEC] sandbox는 app.whenReady() 이전에 활성화해야 한다
+enableSandboxBeforeReady(app);
 
 const isDev = !app.isPackaged;
 
@@ -70,6 +74,9 @@ function createMainWindow(): BrowserWindow {
 }
 
 void app.whenReady().then(() => {
+  // [SEC] session.defaultSession은 whenReady() 이후에 안정적으로 접근 가능
+  installSessionSecurity(session.defaultSession, isDev);
+
   createMainWindow();
 
   app.on('activate', () => {

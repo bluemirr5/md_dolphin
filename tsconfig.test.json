@@ -3,7 +3,8 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
     "types": ["node", "vitest/globals"],
     "strict": true,
     "noUncheckedIndexedAccess": true,
@@ -17,5 +18,5 @@
     "baseUrl": ".",
     "paths": { "@shared/*": ["src/shared/*"] }
   },
-  "include": ["tests/**/*.ts", "src/shared/**/*.ts"]
+  "include": ["tests/**/*.ts", "tests/**/*.tsx", "src/shared/**/*.ts"]
 }
