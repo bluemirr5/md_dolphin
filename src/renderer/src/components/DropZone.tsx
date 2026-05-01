@@ -3,7 +3,8 @@
 //   - dragover + drop 양쪽 preventDefault 의무 (누락 시 Chromium이 파일을 새 탭으로 열어버림)
 //   - renderer에서 File.path 직접 접근 금지 → api.getDroppedFilePath(file) 사용
 //   - 다중 파일 드롭: 첫 파일만 처리, 나머지 무시 + console.warn
-//   - aria: role="region" + aria-label="Drop markdown file here"
+//   - landmark role 미부여: 내부에 <main>·<aside> landmark가 들어가므로 region wrap 시 nesting 위반.
+//     키보드 fallback은 ⌘O 메뉴가 담당.
 // CR10-4: onFileDropError 콜백 추가 — 파일 읽기 실패 시 App.tsx에 에러 분기 위임
 import type { DragEvent, ReactNode } from 'react';
 import type { DocumentData } from '../store/document-store';
@@ -59,8 +60,6 @@ export function DropZone({ children, onFileDrop, onFileDropError }: DropZoneProp
 
   return (
     <div
-      role="region"
-      aria-label="Drop markdown file here"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       style={{ minHeight: '100vh' }}

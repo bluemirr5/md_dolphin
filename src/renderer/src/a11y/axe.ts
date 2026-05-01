@@ -17,7 +17,7 @@ export async function initAxe(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reactDom: any,
 ): Promise<void> {
-  if (process.env['NODE_ENV'] === 'production') return;
+  if (!import.meta.env.DEV) return;
 
   try {
     const axe = await import('@axe-core/react');

@@ -7,14 +7,13 @@
 - 변경 사항 1
 - 변경 사항 2
 
+<!-- v0.11.1 이후 적용. v0.11.0 릴리스 노트는 GitHub Releases에서 원본 그대로 보존. -->
+
 ### 설치 방법
 
 1. 아래 `md_dolphin-${version}-mac-universal.dmg` 파일을 다운로드합니다.
 2. DMG를 열고 `md_dolphin.app`을 `/Applications` 폴더로 드래그합니다.
-3. **처음 실행 시 Gatekeeper 우회 방법** (미서명 앱):
-   1. Finder에서 `.app` 우클릭
-   2. "열기" 메뉴 선택
-   3. 확인 다이얼로그에서 "열기" 클릭
+3. **처음 실행 시 Gatekeeper 우회** (미서명 앱): [README.md#gatekeeper-bypass](https://github.com/bluemirr5/md_dolphin/blob/main/README.md#gatekeeper-bypass) / [한국어 안내](https://github.com/bluemirr5/md_dolphin/blob/main/README.ko.md#gatekeeper-%EC%9A%B0%ED%9A%8C-%EC%95%88%EB%82%B4)
 
 ### DMG SHA256 검증
 

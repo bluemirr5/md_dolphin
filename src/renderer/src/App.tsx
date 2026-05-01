@@ -40,7 +40,7 @@ const EMPTY_HINT_TEXT = `\
 
 ## 이미지 미리보기 (사이클 7)
 
-![원격 이미지 예시](https://via.placeholder.com/320x180?text=Remote+Image)
+![원격 이미지 예시](https://placehold.co/320x180?text=Remote+Image)
 
 ## 인용문 (사이클 7)
 

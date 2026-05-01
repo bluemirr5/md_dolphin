@@ -32,7 +32,7 @@ interface VirtualizedArticleProps<T> {
 function makeScroller(articleRef: Ref<HTMLElement>) {
   return forwardRef<HTMLDivElement, ScrollerProps>(
     function ArticleScroller(
-      { children, style, tabIndex, ...rest }: ScrollerProps,
+      props: ScrollerProps,
       virtuosoInternalRef: ForwardedRef<HTMLDivElement>,
     ) {
       function mergeRefs(el: HTMLDivElement | null): void {
@@ -50,16 +50,10 @@ function makeScroller(articleRef: Ref<HTMLElement>) {
         }
       }
 
+      // react-virtuoso가 부여하는 onScroll·data-virtuoso-scroller-element 등을 그대로 전달해야
+      // 가상화 visible range 계산이 동작한다 (className만 article 토큰으로 덮어씀).
       return (
-        <article
-          ref={mergeRefs}
-          className="md-content"
-          style={style}
-          tabIndex={tabIndex}
-          data-testid={rest['data-testid']}
-        >
-          {children}
-        </article>
+        <article {...props} ref={mergeRefs} className="md-content" />
       );
     },
   );
@@ -89,6 +83,14 @@ export function VirtualizedArticle<T>({
 
   // Scroller: articleRef가 변경될 때만 재생성 (ref는 stable하므로 사실상 1회)
   const Scroller = useMemo(() => makeScroller(articleRef), [articleRef]);
+
+  // react-virtuoso 4.x는 빈 data로 mount 시 내부 dataset 접근에서 null 참조 발생.
+  // 빈 문서(EMPTY_DOCUMENT) 상태에서는 plain article만 렌더하여 race 회피.
+  if (data.length === 0) {
+    return (
+      <article ref={articleRef} className="md-content" tabIndex={-1} />
+    );
+  }
 
   return (
     <Virtuoso

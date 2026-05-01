@@ -39,6 +39,11 @@ export default defineConfig({
       outDir: 'out/renderer',
       rollupOptions: {
         input: { index: resolve(__dirname, 'src/renderer/index.html') },
+        output: {
+          manualChunks: {
+            i18n: ['i18next', 'react-i18next'],
+          },
+        },
       },
     },
     resolve: {
