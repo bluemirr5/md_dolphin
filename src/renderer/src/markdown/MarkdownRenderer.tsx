@@ -1,8 +1,15 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref, RefObject } from 'react';
+import { useRef } from 'react';
 import type Token from 'markdown-it/lib/token.mjs';
 import type { MarkdownDocument } from '@shared/markdown/document';
 import type { HeadingLevel } from '@shared/markdown/heading';
 import { getCachedTokens } from './adapter';
+import { VirtualizedArticle, type VirtuosoScrollHandle } from '../components/VirtualizedArticle';
+import { scrollToAnchor } from '../components/scrollToAnchor';
+
+// 사이클 9: VirtualizedArticle 위임은 opt-in 방식
+// virtualize=true 시 top-level token을 VirtualizedArticle에 위임
+// 기존 테스트 호환성 유지를 위해 기본값은 false (직접 렌더)
 import { HeadingNode } from './nodes/Heading';
 import { Paragraph } from './nodes/Paragraph';
 import { Link } from './nodes/Link';
@@ -18,10 +25,12 @@ import { Blockquote } from './nodes/Blockquote';
 // 사이클 7: Image, Blockquote 신규 도입
 
 // 내부 블록 표현 — 외부 미노출 (사이클 9 react-virtuoso 교체 용이성 확보)
+// anchor: heading 블록의 id 값 — onJump 핸들러가 blockIndex 매핑에 사용
 interface Block {
   readonly kind: string;
   readonly element: ReactNode;
   readonly key: string;
+  readonly anchor?: string;
 }
 
 // html_inline 토큰 콘텐츠에서 checked/disabled 파싱
@@ -462,6 +471,7 @@ function tokenStreamToBlocks(tokens: readonly Token[]): readonly Block[] {
       blocks.push({
         kind: 'heading',
         key,
+        anchor,
         element: (
           <HeadingNode key={key} level={level} anchor={anchor}>
             {children}
@@ -539,13 +549,82 @@ function tokenStreamToBlocks(tokens: readonly Token[]): readonly Block[] {
 
 interface MarkdownRendererProps {
   readonly document: MarkdownDocument;
+  /** 외부에서 article 엘리먼트 참조 주입 (useScrollSpy·scrollToAnchor용) */
+  readonly articleRef?: Ref<HTMLElement>;
+  /**
+   * 사이클 9: true 시 top-level Block 배열을 VirtualizedArticle에 위임 (react-virtuoso 가상화).
+   * 기본값 false — 기존 직접 렌더 방식 유지 (테스트 호환성 보존).
+   * 프로덕션 앱은 App.tsx에서 true로 opt-in.
+   */
+  readonly virtualize?: boolean;
+  /** CR9-6: anchor 점프 폴백용 VirtuosoHandle — virtualize=true 시 VirtualizedArticle에 패스스루 */
+  readonly virtuosoRef?: RefObject<VirtuosoScrollHandle | null>;
+  /**
+   * CR9.2-2: anchor 점프 핸들러 등록 콜백.
+   * MarkdownRenderer 마운트 후 내부 jump 함수를 호출자(App.tsx)에 노출한다.
+   * 내부 함수: scrollToAnchor 1차 시도 → 실패 시 anchor→blockIndex(blocks 인덱스) 변환 후
+   * virtuosoRef.current.scrollToIndex(blockIndex) — tokenIndex(토큰 스트림 인덱스) 오사용 수정.
+   */
+  readonly onJumpReady?: (jumpFn: (anchor: string) => void) => void;
 }
 
 // AC8: 빈 rawText에도 <article> wrapper 존재
 // className="md-content" — CSS 변수·타이포 토큰 스코프 (사이클 4, 설계 제약: prop 변경 없음)
-export function MarkdownRenderer({ document }: MarkdownRendererProps): JSX.Element {
+// 사이클 9: virtualize=true 시 Block 배열을 VirtualizedArticle에 위임
+export function MarkdownRenderer({ document, articleRef, virtualize = false, virtuosoRef, onJumpReady }: MarkdownRendererProps): JSX.Element {
   const tokens = getCachedTokens(document);
   const blocks = tokenStreamToBlocks(tokens);
+  const internalRef = useRef<HTMLElement>(null);
+  const resolvedRef: Ref<HTMLElement> = articleRef ?? internalRef;
 
-  return <article className="md-content">{blocks.map((b) => b.element)}</article>;
+  if (virtualize) {
+    // CR9.2-2: anchor→blockIndex 맵 구성.
+    // tokenIndex(토큰 스트림 인덱스)가 아닌 blocks 배열 인덱스를 Virtuoso에 전달해야 올바른 위치로 이동.
+    const anchorBlockMap = new Map<string, number>();
+    blocks.forEach((b, i) => {
+      if (b.kind === 'heading' && b.anchor !== undefined && b.anchor !== '') {
+        anchorBlockMap.set(b.anchor, i);
+      }
+    });
+
+    // jump 함수: scrollToAnchor 1차 시도 → 실패 시 blockIndex로 scrollToIndex 폴백 → RAF 재시도
+    const jumpFn = (anchor: string): void => {
+      const articleEl = typeof resolvedRef === 'object' && resolvedRef !== null
+        ? (resolvedRef as React.RefObject<HTMLElement | null>).current
+        : null;
+
+      if (articleEl) {
+        const found = scrollToAnchor(anchor, articleEl);
+        if (found) return;
+      }
+
+      // scrollToAnchor 실패 (가상화로 미마운트) → blockIndex로 scrollToIndex 폴백
+      const blockIdx = anchorBlockMap.get(anchor);
+      if (blockIdx !== undefined) {
+        virtuosoRef?.current?.scrollToIndex(blockIdx);
+      }
+
+      // RAF 다음 프레임: Virtuoso가 항목을 마운트한 후 anchor 재시도
+      if (articleEl) {
+        requestAnimationFrame(() => {
+          scrollToAnchor(anchor, articleEl);
+        });
+      }
+    };
+
+    // onJumpReady 콜백으로 jump 함수를 App.tsx에 등록 (매 렌더마다 최신 anchorBlockMap 반영)
+    onJumpReady?.(jumpFn);
+
+    return (
+      <VirtualizedArticle
+        data={blocks}
+        renderItem={(block) => block.element}
+        articleRef={resolvedRef}
+        virtuosoRef={virtuosoRef}
+      />
+    );
+  }
+
+  // 기본: 직접 렌더 (기존 동작 유지)
+  return <article ref={resolvedRef} className="md-content">{blocks.map((b) => b.element)}</article>;
 }

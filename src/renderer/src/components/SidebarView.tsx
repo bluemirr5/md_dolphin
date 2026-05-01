@@ -17,6 +17,7 @@ interface NodeListProps {
 
 function NodeList({ nodes, activeAnchor, onJump }: NodeListProps): JSX.Element | null {
   const visibleNodes = nodes.filter((n) => n.heading.level <= 4);
+  // CR8-6 흡수: children.length === 0 빈 노드 명시 처리 — 빈 배열이면 ul 미렌더
   if (visibleNodes.length === 0) return null;
 
   return (
@@ -31,7 +32,8 @@ function NodeList({ nodes, activeAnchor, onJump }: NodeListProps): JSX.Element |
           >
             {node.heading.text}
           </button>
-          {node.children.length > 0 && (
+          {/* children.length === 0이면 NodeList null 반환 → 빈 ul 미생성 */}
+          {node.children.length === 0 ? null : (
             <NodeList nodes={node.children} activeAnchor={activeAnchor} onJump={onJump} />
           )}
         </li>

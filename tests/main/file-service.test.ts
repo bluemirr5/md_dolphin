@@ -15,7 +15,9 @@ vi.mock('node:fs', () => ({
   promises: {
     readFile: vi.fn(),
     realpath: vi.fn(),
+    open: vi.fn().mockResolvedValue({ close: vi.fn().mockResolvedValue(undefined) }),
   },
+  constants: {},
 }));
 
 import { promises as fs } from 'node:fs';

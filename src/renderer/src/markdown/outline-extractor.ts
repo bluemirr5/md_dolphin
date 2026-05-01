@@ -64,7 +64,8 @@ function extractHeadings(
     const text = flattenInlineTokens(rawInlineChildren);
     const anchor = resolveAnchor(text, usedAnchors);
 
-    headings.push({ level, text, anchor, offset });
+    // tokenIndex: heading_open 토큰의 스트림 내 인덱스 — VirtualizedArticle.scrollToIndex 폴백용 (P9-5)
+    headings.push({ level, text, anchor, offset, tokenIndex: i });
   }
 
   return headings;

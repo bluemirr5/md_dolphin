@@ -1,5 +1,6 @@
 // preload — contextBridge로 renderer에 좁은 IPC 표면을 노출한다.
-// 설계 제약: openFile, readFile, openExternal, getDroppedFilePath, onDocumentOpened, getTheme, watchTheme 7개 노출
+// 설계 제약: openFile, readFile, openExternal, getDroppedFilePath, onDocumentOpened, getTheme, watchTheme 7개 기존 노출
+// 사이클 9 신규: zoomIn/zoomOut/zoomReset, print, savePdf, benchColdStart(dev only) 추가
 // drop 파일 경로: webUtils.getPathForFile 사용 — sandbox=true 환경에서 File.path 제거됨 (Electron 32+)
 import { contextBridge, ipcRenderer, webUtils } from 'electron';
 import {
@@ -10,6 +11,14 @@ import {
   API_GET_THEME,
   API_THEME_UPDATED,
   API_GET_WINDOW_ID,
+  API_BENCH_COLD_START,
+  API_VIEW_ZOOM_IN,
+  API_VIEW_ZOOM_OUT,
+  API_VIEW_ZOOM_RESET,
+  API_VIEW_PRINT,
+  API_VIEW_SAVE_PDF,
+  API_VIEW_TOGGLE_SIDEBAR,
+  API_VIEW_FOCUS_ARTICLE,
 } from '@shared/ipc-channels';
 import type { OpenedFileResult } from '../main/file-service';
 import type { RenderingTheme, ThemeUpdatePayload } from '@shared/theme-types';
@@ -80,6 +89,44 @@ const api = {
    * sendSync — preload 초기화 시점에 main process에서 동기 조회 (sandbox 친화적).
    */
   windowId: ipcRenderer.sendSync(API_GET_WINDOW_ID) as number,
+
+  // ── 사이클 9 신규 IPC ────────────────────────────────────────────────────────
+
+  /** 줌 인 */
+  zoomIn: (): Promise<void> => ipcRenderer.invoke(API_VIEW_ZOOM_IN) as Promise<void>,
+
+  /** 줌 아웃 */
+  zoomOut: (): Promise<void> => ipcRenderer.invoke(API_VIEW_ZOOM_OUT) as Promise<void>,
+
+  /** 줌 리셋 (Actual Size) */
+  zoomReset: (): Promise<void> => ipcRenderer.invoke(API_VIEW_ZOOM_RESET) as Promise<void>,
+
+  /** 시스템 인쇄 다이얼로그 표시 */
+  print: (): Promise<void> => ipcRenderer.invoke(API_VIEW_PRINT) as Promise<void>,
+
+  /** PDF 저장 다이얼로그 표시 → 파일 저장 */
+  savePdf: (): Promise<void> => ipcRenderer.invoke(API_VIEW_SAVE_PDF) as Promise<void>,
+
+  /** main → renderer: 사이드바 토글 이벤트 구독 */
+  onToggleSidebar: (callback: () => void): (() => void) => {
+    const handler = () => callback();
+    ipcRenderer.on(API_VIEW_TOGGLE_SIDEBAR, handler);
+    return () => { ipcRenderer.removeListener(API_VIEW_TOGGLE_SIDEBAR, handler); };
+  },
+
+  /** main → renderer: 문서 영역 포커스 이벤트 구독 */
+  onFocusArticle: (callback: () => void): (() => void) => {
+    const handler = () => callback();
+    ipcRenderer.on(API_VIEW_FOCUS_ARTICLE, handler);
+    return () => { ipcRenderer.removeListener(API_VIEW_FOCUS_ARTICLE, handler); };
+  },
+
+  // bench:cold-start — dev only (process.env.NODE_ENV !== 'production')
+  // AC12: production 빌드에서는 미노출
+  ...(process.env['NODE_ENV'] !== 'production' ? {
+    benchColdStart: (): Promise<{ appStart: number; appReady: number | null; elapsed: number | null }> =>
+      ipcRenderer.invoke(API_BENCH_COLD_START) as Promise<{ appStart: number; appReady: number | null; elapsed: number | null }>,
+  } : {}),
 } as const;
 
 try {

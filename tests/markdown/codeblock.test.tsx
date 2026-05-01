@@ -3,7 +3,7 @@ import { render, screen, act, cleanup } from '@testing-library/react';
 import { CodeBlock } from '../../src/renderer/src/markdown/nodes/CodeBlock';
 
 // shiki 모듈을 mock하여 RTL 테스트에서 비동기 흐름 제어
-vi.mock('../../src/renderer/src/markdown/shiki', () => ({
+vi.mock('../../src/renderer/src/markdown/shiki-loader', () => ({
   highlightCode: vi.fn(),
 }));
 
@@ -18,7 +18,7 @@ describe('사후 — CodeBlock 시각·복사 버튼·shiki 비동기 주입', (
   });
 
   it('AC4-a: 언어 라벨이 우상단에 표시됨', async () => {
-    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki');
+    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki-loader');
     vi.mocked(highlightCode).mockResolvedValue(null);
 
     render(<CodeBlock code="const x = 1" language="typescript" />);
@@ -27,7 +27,7 @@ describe('사후 — CodeBlock 시각·복사 버튼·shiki 비동기 주입', (
   });
 
   it('AC4-b: 언어 미지정이면 라벨 없음', async () => {
-    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki');
+    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki-loader');
     vi.mocked(highlightCode).mockResolvedValue(null);
 
     render(<CodeBlock code="plain code" language={undefined} />);
@@ -38,7 +38,7 @@ describe('사후 — CodeBlock 시각·복사 버튼·shiki 비동기 주입', (
   });
 
   it('AC4-c: 복사 버튼 aria-label="코드 복사" 존재', async () => {
-    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki');
+    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki-loader');
     vi.mocked(highlightCode).mockResolvedValue(null);
 
     render(<CodeBlock code="const x = 1" language="typescript" />);
@@ -48,7 +48,7 @@ describe('사후 — CodeBlock 시각·복사 버튼·shiki 비동기 주입', (
   });
 
   it('AC4-d: 복사 버튼 Tab 포커스 가능 (tabIndex 기본값)', async () => {
-    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki');
+    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki-loader');
     vi.mocked(highlightCode).mockResolvedValue(null);
 
     render(<CodeBlock code="const x = 1" language="typescript" />);
@@ -60,7 +60,7 @@ describe('사후 — CodeBlock 시각·복사 버튼·shiki 비동기 주입', (
   });
 
   it('AC4-e: 복사 버튼 클릭 시 navigator.clipboard.writeText 호출', async () => {
-    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki');
+    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki-loader');
     vi.mocked(highlightCode).mockResolvedValue(null);
 
     const writeText = vi.fn().mockResolvedValue(undefined);
@@ -80,7 +80,7 @@ describe('사후 — CodeBlock 시각·복사 버튼·shiki 비동기 주입', (
   });
 
   it('AC5-a: shiki resolve 전 plain <pre><code> 표시 (FOUC 없음)', async () => {
-    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki');
+    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki-loader');
     // Promise를 resolve하지 않아 shiki 미적용 상태 시뮬레이션
     vi.mocked(highlightCode).mockReturnValue(new Promise(() => {}));
 
@@ -94,7 +94,7 @@ describe('사후 — CodeBlock 시각·복사 버튼·shiki 비동기 주입', (
   });
 
   it('AC5-b: shiki HTML 반환 후 dangerouslySetInnerHTML로 교체', async () => {
-    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki');
+    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki-loader');
     const fakeHtml = '<pre class="shiki"><code><span>const x = 1</span></code></pre>';
     vi.mocked(highlightCode).mockResolvedValue(fakeHtml);
 
@@ -110,7 +110,7 @@ describe('사후 — CodeBlock 시각·복사 버튼·shiki 비동기 주입', (
   });
 
   it('AC5-c: 언어 미지정이면 shiki 미적용 — plain 유지', async () => {
-    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki');
+    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki-loader');
     vi.mocked(highlightCode).mockResolvedValue(null);
 
     const { container } = render(<CodeBlock code="plain code" language={undefined} />);
@@ -126,7 +126,7 @@ describe('사후 — CodeBlock 시각·복사 버튼·shiki 비동기 주입', (
   });
 
   it('AC9: codeblock wrapper div 존재', async () => {
-    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki');
+    const { highlightCode } = await import('../../src/renderer/src/markdown/shiki-loader');
     vi.mocked(highlightCode).mockResolvedValue(null);
 
     const { container } = render(<CodeBlock code="code" language="javascript" />);

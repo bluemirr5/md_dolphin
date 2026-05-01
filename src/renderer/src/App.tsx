@@ -1,8 +1,9 @@
 // App.tsx — 사이클 8: TOC 사이드바 합류
 // - <DropZone> 내부 layout: <aside>(SidebarView) + <main>(MarkdownRenderer) 2-column flex
-// - ⌘1: 사이드바 토글, ⌘2: 본문 focus
+// - ⌘1: 사이드바 토글, ⌘2: 본문 포커스
 // - useScrollSpy: IntersectionObserver로 activeAnchor 추적
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { type VirtuosoHandle } from 'react-virtuoso';
 import { MarkdownRenderer } from './markdown/MarkdownRenderer';
 import { parseMarkdown } from './markdown/adapter';
 import { DocumentProvider, useDocumentStore } from './store/document-store.factory';
@@ -11,7 +12,6 @@ import { DropZone } from './components/DropZone';
 import { SidebarView } from './components/SidebarView';
 import { SidebarToggleButton } from './components/SidebarToggleButton';
 import { useScrollSpy } from './components/useScrollSpy';
-import { scrollToAnchor } from './components/scrollToAnchor';
 import { useSidebarVisible, useSidebarToggle } from './store/sidebar-store';
 import type { DocumentData } from './store/document-store';
 import './styles/theme.css';
@@ -84,13 +84,22 @@ function AppInner(): JSX.Element {
   // useEffect + 의존성 배열 없음 방식은 매 렌더마다 실행되므로 ref callback으로 교체한다.
   // mainNodeRef: ⌘2 포커스용 HTMLElement 참조 (ref callback으로 유지)
   const mainNodeRef = useRef<HTMLElement | null>(null);
-  const articleRef = useRef<Element | null>(null);
+  // CR9.2-2: Element → HTMLElement — MarkdownRenderer의 articleRef Ref<HTMLElement>와 타입 통일
+  const articleRef = useRef<HTMLElement | null>(null);
+  // CR9-6: 가상화 환경 anchor 점프 폴백용 VirtuosoHandle
+  const virtuosoRef = useRef<VirtuosoHandle | null>(null);
   const mainCallbackRef = useCallback((node: HTMLElement | null) => {
     mainNodeRef.current = node;
     articleRef.current = node ? node.querySelector('article') : null;
   }, []);
 
   const activeAnchor = useScrollSpy(rendererDocument.headings, articleRef);
+
+  // CR9.2-2: MarkdownRenderer의 내부 jump 핸들러(anchor→blockIndex 변환)를 외부에 노출.
+  // MarkdownRenderer가 blocks 배열 인덱스를 직접 알고 있으므로
+  // App.tsx가 tokenIndex로 잘못 접근하는 문제를 해결한다.
+  // SidebarView → handleJump → rendererJumpRef.current(anchor) → MarkdownRenderer 내부 처리.
+  const rendererJumpRef = useRef<((anchor: string) => void) | undefined>(undefined);
 
   // main 메뉴 ⌘O → main이 api:openFile IPC를 push하면 여기서 처리
   useEffect(() => {
@@ -105,6 +114,20 @@ function AppInner(): JSX.Element {
     });
     return cleanup;
   }, [setDocument]);
+
+  // main 메뉴 ⌘1/⌘2 → main이 IPC push → renderer에서 수신
+  useEffect(() => {
+    const cleanupToggle = window.api.onToggleSidebar(() => {
+      toggle();
+    });
+    const cleanupFocus = window.api.onFocusArticle(() => {
+      mainNodeRef.current?.focus();
+    });
+    return () => {
+      cleanupToggle();
+      cleanupFocus();
+    };
+  }, [toggle]);
 
   // 키보드 단축키 — ⌘O·⌘1·⌘2
   useEffect(() => {
@@ -134,11 +157,9 @@ function AppInner(): JSX.Element {
     setDocument(doc);
   }
 
+  // SidebarView의 onJump → MarkdownRenderer 내부 핸들러 경유
   function handleJump(anchor: string): void {
-    const article = articleRef.current;
-    if (article) {
-      scrollToAnchor(anchor, article);
-    }
+    rendererJumpRef.current?.(anchor);
   }
 
   return (
@@ -155,7 +176,13 @@ function AppInner(): JSX.Element {
           </aside>
         )}
         <main className="md-main" ref={mainCallbackRef} tabIndex={-1}>
-          <MarkdownRenderer document={rendererDocument} />
+          <MarkdownRenderer
+            document={rendererDocument}
+            virtualize
+            virtuosoRef={virtuosoRef}
+            articleRef={articleRef}
+            onJumpReady={(fn) => { rendererJumpRef.current = fn; }}
+          />
         </main>
       </div>
     </DropZone>

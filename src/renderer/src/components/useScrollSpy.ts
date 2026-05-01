@@ -52,7 +52,10 @@ export function useScrollSpy(
     }
 
     return () => observer.disconnect();
-  }, [headings, articleRef]);
+  // CR8-7 흡수: articleRef.current를 deps에 명시 (eslint-plugin-react-hooks exhaustive-deps 준수)
+  // articleRef 자체는 stable ref object이지만 .current 변경을 추적하기 위해 추가
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [headings, articleRef, articleRef.current]);
 
   return activeAnchor;
 }

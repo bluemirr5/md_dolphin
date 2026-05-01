@@ -3,9 +3,8 @@
 // 적용 대상: shiki 출력 <pre>/<code>/<span style="--shiki-*|color:#..."> 구조만
 // task-list checkbox는 React 트리에서 완결 — DOMPurify 미경유 (cycle-06-html-inline-review 참조)
 //
-// DOMPurify 환경:
-//   - renderer(Chromium): window 전역 DOMParser 사용
-//   - test(jsdom/happy-dom): window가 globalThis에 주입되므로 동일 코드 동작
+// CR7-9 흡수: DOMPurify 인스턴스를 모듈 로드 시→첫 호출 시 lazy 생성으로 전환
+// SSR/Node 환경(typeof window === 'undefined')에서 import 해도 throw 없음
 import DOMPurify from 'dompurify';
 
 // 허용 태그 목록 — shiki 출력 구조에 필요한 3가지
@@ -46,32 +45,44 @@ function filterStyleDeclarations(styleValue: string): string | null {
   return allowed.length > 0 ? allowed.join(';') : null;
 }
 
-// DOMPurify 인스턴스 — 모듈 로드 시 1회 생성
-// Chromium/jsdom 양쪽에서 globalThis.window 기반 DOMParser 사용
-const purify = DOMPurify(window);
+// DOMPurify 인스턴스 — 첫 호출 시 lazy 생성 (CR7-9 흡수)
+let _purify: ReturnType<typeof DOMPurify> | null = null;
 
-// uponSanitizeAttribute hook — style 값을 화이트리스트 함수로 재처리
-// DOMPurify ALLOWED_ATTR에서 style을 허용한 후, hook에서 개별 declaration 필터링
-// CR7-4: __strip__ 마커 대신 빈 문자열로 교체 → afterSanitizeAttributes에서 빈 style 제거
-purify.addHook('uponSanitizeAttribute', (_node, data) => {
-  if (data.attrName === 'style') {
-    const filtered = filterStyleDeclarations(data.attrValue);
-    if (filtered === null) {
-      // 모든 declaration 비허용 → 빈 문자열로 교체 (afterSanitizeAttributes에서 제거)
-      data.attrValue = '';
-    } else {
-      data.attrValue = filtered;
+function getPurify(): ReturnType<typeof DOMPurify> {
+  if (_purify !== null) return _purify;
+
+  if (typeof window === 'undefined') {
+    // SSR/Node 환경 — window 없음. sanitize 불가
+    throw new Error('[sanitize] DOMPurify는 브라우저 환경에서만 사용 가능합니다');
+  }
+
+  // CR9-7: 인스턴스를 먼저 _purify에 할당 → hook 등록 전에 재진입해도 동일 인스턴스 반환
+  // (JS 싱글스레드이므로 실제 race 가능성은 없으나, 코드 명확성 + 향후 microtask 방어)
+  _purify = DOMPurify(window);
+
+  // uponSanitizeAttribute hook — style 값을 화이트리스트 함수로 재처리
+  // CR7-4: __strip__ 마커 대신 빈 문자열로 교체 → afterSanitizeAttributes에서 빈 style 제거
+  _purify.addHook('uponSanitizeAttribute', (_node, data) => {
+    if (data.attrName === 'style') {
+      const filtered = filterStyleDeclarations(data.attrValue);
+      if (filtered === null) {
+        // 모든 declaration 비허용 → 빈 문자열로 교체 (afterSanitizeAttributes에서 제거)
+        data.attrValue = '';
+      } else {
+        data.attrValue = filtered;
+      }
     }
-  }
-});
+  });
 
-// afterSanitizeAttributes hook — 빈 style 속성을 element에서 완전 제거
-// DOMPurify가 attrValue='' 로 설정한 style=""을 최종 정리
-purify.addHook('afterSanitizeAttributes', (node) => {
-  if (node.getAttribute?.('style') === '') {
-    node.removeAttribute('style');
-  }
-});
+  // afterSanitizeAttributes hook — 빈 style 속성을 element에서 완전 제거
+  _purify.addHook('afterSanitizeAttributes', (node) => {
+    if (node.getAttribute?.('style') === '') {
+      node.removeAttribute('style');
+    }
+  });
+
+  return _purify;
+}
 
 /**
  * shiki 출력 HTML을 DOMPurify로 sanitize한다.
@@ -79,9 +90,12 @@ purify.addHook('afterSanitizeAttributes', (node) => {
  * 허용: <pre>/<code>/<span>, class/style 속성
  * style 내 허용: --shiki-light/#hex, --shiki-dark/#hex, color/#hex
  * 그 외 태그·속성·style declaration은 strip.
+ *
+ * lazy 초기화: 첫 호출 시 DOMPurify 인스턴스 생성 (CR7-9)
+ * 가상화 환경의 동적 mount 코드블록도 동일 경로 통과 (사이클 7 AC2 회귀 가드)
  */
 export function sanitizeShikiHtml(html: string): string {
-  return purify.sanitize(html, {
+  return getPurify().sanitize(html, {
     ALLOWED_TAGS,
     ALLOWED_ATTR: ALLOWED_ATTRS,
   });

@@ -38,5 +38,15 @@ interface Window {
     readonly watchTheme: (callback: (payload: ThemeUpdatePayload) => void) => () => void;
     /** 현재 BrowserWindow의 id — mddolphin-asset:// 프로토콜 baseDir 조회에 사용 (P7-10) */
     readonly windowId: number;
+    // 사이클 9 신규 IPC
+    readonly zoomIn: () => Promise<void>;
+    readonly zoomOut: () => Promise<void>;
+    readonly zoomReset: () => Promise<void>;
+    readonly print: () => Promise<void>;
+    readonly savePdf: () => Promise<void>;
+    /** main → renderer: 사이드바 토글 이벤트 구독 */
+    readonly onToggleSidebar: (callback: () => void) => () => void;
+    /** main → renderer: 문서 영역 포커스 이벤트 구독 */
+    readonly onFocusArticle: (callback: () => void) => () => void;
   };
 }

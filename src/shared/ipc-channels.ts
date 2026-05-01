@@ -22,3 +22,29 @@ export const API_THEME_UPDATED = 'api:themeUpdated' as const;
 
 /** renderer → main: 현재 윈도우 id 동기 조회 (sendSync) — P7-10 windowId 주입 */
 export const API_GET_WINDOW_ID = 'api:getWindowId' as const;
+
+// ── 사이클 9 신규 채널 ────────────────────────────────────────────────────────
+
+/** renderer → main: 콜드 스타트 시간 조회 (dev only) */
+export const API_BENCH_COLD_START = 'bench:cold-start' as const;
+
+/** renderer → main: 줌 인 */
+export const API_VIEW_ZOOM_IN = 'view:zoom-in' as const;
+
+/** renderer → main: 줌 아웃 */
+export const API_VIEW_ZOOM_OUT = 'view:zoom-out' as const;
+
+/** renderer → main: 줌 리셋 */
+export const API_VIEW_ZOOM_RESET = 'view:zoom-reset' as const;
+
+/** renderer → main: 시스템 인쇄 다이얼로그 표시 */
+export const API_VIEW_PRINT = 'view:print' as const;
+
+/** renderer → main: PDF 저장 다이얼로그 표시 → 파일 저장 */
+export const API_VIEW_SAVE_PDF = 'view:save-pdf' as const;
+
+/** main → renderer: 사이드바 토글 */
+export const API_VIEW_TOGGLE_SIDEBAR = 'view:toggle-sidebar' as const;
+
+/** main → renderer: 문서 영역 포커스 */
+export const API_VIEW_FOCUS_ARTICLE = 'view:focus-article' as const;

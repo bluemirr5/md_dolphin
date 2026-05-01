@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { ImageLightbox } from './ImageLightbox';
 
 interface ImageProps {
@@ -45,7 +45,8 @@ export function Image({ src, alt, title }: ImageProps): JSX.Element {
   const [loadError, setLoadError] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  const resolvedSrc = resolveImageSrc(src, getWindowId());
+  // CR7-5 흡수: src/alt 기준 useMemo로 props 객체 메모화 → 가상화 환경 리렌더 비용 감소
+  const resolvedSrc = useMemo(() => resolveImageSrc(src, getWindowId()), [src]);
   const hasValidSrc = resolvedSrc !== '';
 
   function handleClick(): void {

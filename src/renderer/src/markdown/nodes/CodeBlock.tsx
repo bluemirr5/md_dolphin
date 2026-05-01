@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { highlightCode } from '../shiki';
+import { highlightCode } from '../shiki-loader';
 import { sanitizeShikiHtml } from '../sanitize';
 
 // AC9: props는 사이클 2 인터페이스 동결 — 내부 상태만 추가 (설계 제약)

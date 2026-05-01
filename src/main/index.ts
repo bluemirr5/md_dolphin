@@ -8,6 +8,9 @@ import { registerIpcHandlers } from './ipc-handlers';
 import { registerOpenFileHandler, flushQueueToWindow } from './open-file-handler';
 import { installMenu } from './menu';
 import { registerAssetProtocol, ASSET_SCHEME } from './asset-protocol';
+import { registerZoomIpc } from './zoom-ipc';
+import { registerPrintIpc } from './print-ipc';
+import { registerBenchIpc } from './bench-ipc';
 
 // BrowserWindow 초기 배경색 — nativeTheme 기반 동적 결정 (DoD B, P4-3)
 // ThemeProvider await 동안 첫 paint 색상 일치 → FOUC 방지
@@ -110,7 +113,16 @@ void app.whenReady().then(() => {
 
   // IPC 핸들러 등록 — dispose는 app quit 시 정리
   const disposeIpcHandlers = registerIpcHandlers(fileService, windowManager);
-  app.once('before-quit', disposeIpcHandlers);
+  const disposeZoomIpc = registerZoomIpc();
+  const disposePrintIpc = registerPrintIpc();
+  const disposeBenchIpc = registerBenchIpc();
+
+  app.once('before-quit', () => {
+    disposeIpcHandlers();
+    disposeZoomIpc();
+    disposePrintIpc();
+    disposeBenchIpc?.();
+  });
 
   // 메뉴 설치 — fileService + windowManager 주입
   installMenu(fileService, windowManager);
