@@ -43,7 +43,7 @@
 | **react-i18next@^17** (사이클 10) | 다국어 손실                                | 사이클 10에서 v17 도입(스펙 ^14 예정이었으나 v17 상향)                                     |
 | **iconv-lite@^0.6.x** (사이클 10) | 인코딩 감지 불가 — fallback만 가능        | 문자 손상 에러로 사용자 불편. 대안 없음(Node 내장 UTF-8 외 미지원). 32MB 입력 상한으로 BOMB 방어. |
 | **@axe-core/react@^4.x** (사이클 10, dev only) | a11y 검증 미수행                           | dev 환경만 로드. production tree-shake로 번들 미포함. CR9-S1 verify-prod-bundle로 검증.    |
-| **electron-builder**             | 패키징 실패                                | electron-forge로 대체 (사이클 11a에서 결정 게이트)                                        |
+| **electron-builder ^26.8.1** (사이클 11a, devDep) | 패키징 실패                                | electron-forge로 대체 가능. 사이클 11a에서 ^26.x 도입(DMG + Universal Binary + GitHub Actions 자동화). |
 | **GitHub Releases (배포 채널)**  | 다운로드 불가                              | Homebrew Cask 채널 병행. Cloudflare R2 자체 호스팅도 옵션                                 |
 | **Homebrew Cask**                | 설치 자동화 채널 손실                      | GitHub Releases 직접 다운로드로 우회                                                      |
 | **macOS Gatekeeper 정책 변화**   | 미서명 앱 우회 불가                        | 결정 게이트 시그널 모니터링, 트리거 시 노타라이즈 전환                                    |

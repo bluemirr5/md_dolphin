@@ -6,7 +6,6 @@ import App from './App';
 import './styles/global.css';
 import './styles/sidebar.css';
 import { initI18n } from './i18n/index';
-import { initZoomBridge } from './zoom-bridge';
 import { initAxe } from './a11y/axe';
 
 async function bootstrap(): Promise<void> {
@@ -24,8 +23,8 @@ async function bootstrap(): Promise<void> {
     </StrictMode>,
   );
 
-  // 줌 브릿지 초기화 — CSS --font-scale 단일 진입점 (P10-4)
-  initZoomBridge();
+  // 줌 브릿지 초기화는 App.tsx useEffect로 이전 (사이클 11a CR10-6)
+  // — App unmount 시 cleanup 자동 호출 보장
 
   // axe-core dev only (production에서는 initAxe 내부에서 조기 반환)
   void initAxe(React, ReactDOM);

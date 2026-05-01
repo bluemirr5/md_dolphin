@@ -20,7 +20,9 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "fixtures:build": "tsx tests/fixtures/build-large-md.ts"
+    "fixtures:build": "tsx tests/fixtures/build-large-md.ts",
+    "dist": "electron-vite build && electron-builder --mac dmg --universal",
+    "dist:checksum": "shasum -a 256 release/*.dmg > release/SHA256SUMS.txt"
   },
   "dependencies": {
     "dompurify": "^3.4.1",

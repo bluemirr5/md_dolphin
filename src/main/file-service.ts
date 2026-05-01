@@ -33,7 +33,7 @@ export type OpenedFileResult = OpenedFile | OpenedFileError;
  */
 export type FileErrorKind =
   | 'permission'   // EACCES / EPERM
-  | 'encoding'     // 인코딩 관련 (향후 확장용)
+  | 'encoding'     // 안전망: iconv 후보 모두 실패 시 'not-markdown'으로 대체되므로 production에서 도달 불가. type exhaustiveness 보존용 (CR10-10)
   | 'not-markdown' // 모든 인코딩 시도 실패 (완전 손상)
   | 'too-large'    // 10MB 초과 (stat 단계)
   | 'empty'        // 0B 파일
@@ -179,7 +179,8 @@ export class FileService {
       }
     }
 
-    // 1단계: stat으로 크기 사전 확인
+    // 1단계: stat → size 검사 → read 진입 전 early return (CR10-1)
+    // 처리 순서: stat 실패 → io/permission, 0B → empty, 32MB+ → too-large(iconv 폭탄 방어), 10MB+ → too-large
     let fileSize: number;
     try {
       const stats = await fs.stat(filePath);
@@ -196,10 +197,12 @@ export class FileService {
       return { ok: false, error: { kind: 'empty', pathHint: filePath } };
     }
 
+    // iconv 디코딩 폭탄 방어: ICONV_MAX_BYTES(32MB) 초과 시 read 진입 전 차단
     if (fileSize > ICONV_MAX_BYTES) {
       return { ok: false, error: { kind: 'too-large', pathHint: filePath } };
     }
 
+    // 사용자 경고 임계: TOO_LARGE_BYTES(10MB) 초과 시 too-large (ipc-handlers에서 모달 선행)
     if (fileSize > TOO_LARGE_BYTES) {
       return { ok: false, error: { kind: 'too-large', pathHint: filePath } };
     }

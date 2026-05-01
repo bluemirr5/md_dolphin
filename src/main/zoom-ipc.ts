@@ -3,6 +3,7 @@
 // 사이클 10: setZoomFactor를 1.0으로 고정 — CSS --font-scale 단일 진입점 (P10-4)
 //   줌 레벨 변경 시 view:zoom-changed 이벤트로 renderer에 푸시 → zoom-bridge.ts가 --font-scale 갱신
 // windowId -1 sentinel 시 IPC noop + console.warn 1회 (CR7-11)
+// 사이클 11a (CR10-7): ZOOM_STEP/MIN/MAX → @shared/zoom 단일 진실원으로 통일
 import { ipcMain, webContents } from 'electron';
 import {
   API_VIEW_ZOOM_IN,
@@ -10,11 +11,7 @@ import {
   API_VIEW_ZOOM_RESET,
   API_VIEW_ZOOM_CHANGED,
 } from '@shared/ipc-channels';
-
-// Electron 권고 줌 범위: -3~+3 (약 50%~300%)
-const ZOOM_STEP = 0.5;
-const ZOOM_MIN = -3;
-const ZOOM_MAX = 3;
+import { ZOOM_STEP, ZOOM_MIN, ZOOM_MAX } from '@shared/zoom';
 
 /** 윈도우별 줌 레벨 상태 (webContents.id → zoomLevel) */
 const zoomLevels = new Map<number, number>();

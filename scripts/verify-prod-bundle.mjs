@@ -11,14 +11,10 @@ import { join, extname } from 'node:path';
 // electron-vite는 out/ 디렉토리에 빌드 출력 (dist/ 아님)
 const DIST_DIR = new URL('../out', import.meta.url).pathname;
 
-/** production 번들에 포함 금지인 문자열 목록
- *
- * 주의:
- * - 'bench:cold-start'는 ipc-channels.ts의 채널 상수명으로 main/preload 번들에 포함됨 (정상).
- *   실제 bench handler 코드는 NODE_ENV 가드로 production에서 실행 불가하나 번들에는 포함됨.
- *   renderer 번들에서의 benchColdStart 노출만 가드. (preload dev-only 분기로 미등록)
- * - 'axe-core' 문자열은 renderer production 번들에서 완전 tree-shake 필요.
- */
+// dev-only 코드가 production 번들에 포함되지 않는지 검증 (CR10-11).
+// axe-core(@axe-core/react dev import)만 가드 — NODE_ENV !== 'production' 가드로 tree-shake 필요.
+// bench:cold-start, bench:render는 main/preload 번들에 포함 정상 — renderer 분리 가드 미적용
+/** production 번들에 포함 금지인 문자열 목록 */
 const FORBIDDEN_STRINGS = [
   'axe-core',
 ];

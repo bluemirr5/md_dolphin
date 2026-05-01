@@ -3,6 +3,7 @@
 // - ⌘1: 사이드바 토글, ⌘2: 본문 포커스
 // - useScrollSpy: IntersectionObserver로 activeAnchor 추적
 // CR10-4: ErrorState/LargeFileWarning 실제 앱 경로 연결
+// 사이클 11a (CR10-6): zoom-bridge cleanup useEffect 패턴으로 App unmount 시 dispose 보장
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type VirtuosoHandle } from 'react-virtuoso';
 import { MarkdownRenderer } from './markdown/MarkdownRenderer';
@@ -16,6 +17,7 @@ import { ErrorState } from './components/ErrorState';
 import { LargeFileWarning } from './components/LargeFileWarning';
 import { useScrollSpy } from './components/useScrollSpy';
 import { useSidebarVisible, useSidebarToggle } from './store/sidebar-store';
+import { initZoomBridge } from './zoom-bridge';
 import type { DocumentData } from './store/document-store';
 import type { FileErrorKind } from '../../main/file-service';
 import './styles/theme.css';
@@ -103,6 +105,9 @@ function AppInner(): JSX.Element {
   const setDocument = useDocumentStore((s) => s.setDocument);
   const visible = useSidebarVisible();
   const toggle = useSidebarToggle();
+
+  // 사이클 11a (CR10-6): zoom-bridge IPC 리스너 구독 + unmount 시 cleanup 보장
+  useEffect(() => initZoomBridge(), []);
 
   // CR10-4: 에러 상태 / LargeFileWarning 대기 상태
   const [fileError, setFileError] = useState<FileErrorState | null>(null);

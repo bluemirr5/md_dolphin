@@ -98,8 +98,8 @@
 ```json
 {
   "dependencies": {
-    "i18next": "^23.x",
-    "react-i18next": "^14.x",
+    "i18next": "^26.x",
+    "react-i18next": "^17.x",
     "iconv-lite": "^0.6.x"
   },
   "devDependencies": {
@@ -107,6 +107,8 @@
   }
 }
 ```
+
+**실설치 버전 갱신 (CR10-8)**: 스펙 원안 `i18next ^23.x` / `react-i18next ^14.x` → 실제 설치 시 최신 메이저 `i18next ^26.0.8` / `react-i18next ^17.0.6` 채택. API 호환 확인 완료 (2026-05-01 사이클 11a 처리).
 
 i18next/react-i18next는 renderer 전용. main은 `src/shared/i18n-lookup.ts` 자체 helper 사용(별도 의존성 0).
 

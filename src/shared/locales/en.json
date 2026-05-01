@@ -34,12 +34,30 @@
     }
   },
   "errors": {
-    "permission": "Cannot access this file. Please check file permissions.",
-    "encoding": "Cannot recognize the file encoding.",
-    "notMarkdown": "Cannot read the Markdown file. The file may be corrupted.",
-    "tooLarge": "The file is too large (over 10MB). You can choose to continue opening it.",
-    "empty": "The file is empty.",
-    "io": "An error occurred while reading the file.",
+    "permission": {
+      "message": "Cannot access this file. Please check file permissions.",
+      "ariaLabel": "Permission error"
+    },
+    "encoding": {
+      "message": "Cannot recognize the file encoding.",
+      "ariaLabel": "Encoding error"
+    },
+    "notMarkdown": {
+      "message": "Cannot read the Markdown file. The file may be corrupted.",
+      "ariaLabel": "Markdown error"
+    },
+    "tooLarge": {
+      "message": "The file is too large (over 10MB). You can choose to continue opening it.",
+      "ariaLabel": "File size error"
+    },
+    "empty": {
+      "message": "The file is empty.",
+      "ariaLabel": "Empty file error"
+    },
+    "io": {
+      "message": "An error occurred while reading the file.",
+      "ariaLabel": "File read error"
+    },
     "retry": "Retry",
     "cancel": "Cancel"
   },

@@ -1,7 +1,8 @@
 node_modules/
 out/
 dist/
-release/
+/release/*
+!/release/release-notes.template.md
 *.log
 .DS_Store
 .vscode/

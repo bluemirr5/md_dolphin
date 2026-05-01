@@ -7,6 +7,7 @@
 // View: Zoom In(⌘+)·Zoom Out(⌘-)·Actual Size(⌘0)·Toggle Sidebar(⌘1)·Focus Article(⌘2)
 // Window/Edit/Help: 표준 role
 // ⌘1/⌘2: menu accelerator → IPC push (사이클 8 keydown handler와 동일 채널 사용 — 충돌 없음)
+// 사이클 11a (CR10-7): ZOOM_STEP → @shared/zoom 단일 진실원으로 통일
 import { app, Menu, BrowserWindow } from 'electron';
 import { API_DOCUMENT_OPENED, API_VIEW_TOGGLE_SIDEBAR, API_VIEW_FOCUS_ARTICLE } from '@shared/ipc-channels';
 import { lookup, normalizeMainLocale } from '@shared/i18n-lookup';
@@ -15,6 +16,7 @@ import type { DocumentWindowManager } from './document-window';
 import { applyZoom } from './zoom-ipc';
 import { printPage, printToPdf } from './print-ipc';
 import { dirname } from 'node:path';
+import { ZOOM_STEP } from '@shared/zoom';
 
 /**
  * Application Menu를 설치한다.
@@ -124,7 +126,7 @@ export function installMenu(
         accelerator: 'CmdOrCtrl+Plus',
         click: () => {
           const win = getFocusedWindow();
-          if (win) applyZoom(win.webContents, 0.5);
+          if (win) applyZoom(win.webContents, ZOOM_STEP);
         },
       },
       {
@@ -132,7 +134,7 @@ export function installMenu(
         accelerator: 'CmdOrCtrl+-',
         click: () => {
           const win = getFocusedWindow();
-          if (win) applyZoom(win.webContents, -0.5);
+          if (win) applyZoom(win.webContents, -ZOOM_STEP);
         },
       },
       {

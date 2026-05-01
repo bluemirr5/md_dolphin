@@ -94,6 +94,7 @@ export function useScrollSpy(
     return () => observer.disconnect();
   // CR10-5: suspendUntilRef/pendingTargetRef은 ref이므로 deps 불필요.
   // articleRef.current(CR10-12)도 deps에서 제거 — articleRef 자체만 추적.
+  // 회귀 가드(CR10-12): deps에 articleRef.current를 추가하면 Observer가 매 렌더마다 disconnect/reconnect됨 — 절대 추가 금지.
   }, [headings, articleRef]);
 
   return { activeAnchor, suspendScrollSpy };
