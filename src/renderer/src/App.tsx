@@ -1,13 +1,18 @@
-// App.tsx — 사이클 4: ThemeProvider 합류
-// - ThemeProvider(외) → DocumentProvider(내) 순서 고정 (P3-6, P4-1)
-// - theme.css·typography.css 글로벌 CSS import
-// - 사이클 3 DropZone·⌘O·IPC 유지
-import { useEffect } from 'react';
+// App.tsx — 사이클 8: TOC 사이드바 합류
+// - <DropZone> 내부 layout: <aside>(SidebarView) + <main>(MarkdownRenderer) 2-column flex
+// - ⌘1: 사이드바 토글, ⌘2: 본문 focus
+// - useScrollSpy: IntersectionObserver로 activeAnchor 추적
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { MarkdownRenderer } from './markdown/MarkdownRenderer';
 import { parseMarkdown } from './markdown/adapter';
 import { DocumentProvider, useDocumentStore } from './store/document-store.factory';
 import { ThemeProvider } from './context/ThemeProvider';
 import { DropZone } from './components/DropZone';
+import { SidebarView } from './components/SidebarView';
+import { SidebarToggleButton } from './components/SidebarToggleButton';
+import { useScrollSpy } from './components/useScrollSpy';
+import { scrollToAnchor } from './components/scrollToAnchor';
+import { useSidebarVisible, useSidebarToggle } from './store/sidebar-store';
 import type { DocumentData } from './store/document-store';
 import './styles/theme.css';
 import './styles/typography.css';
@@ -24,6 +29,8 @@ const EMPTY_HINT_TEXT = `\
 
 - **⌘O** — 파일 열기 다이얼로그
 - **드래그 & 드롭** — 마크다운 파일을 이 창에 드롭
+- **⌘1** — 목차 사이드바 토글
+- **⌘2** — 본문 포커스
 
 ## 이미지 미리보기 (사이클 7)
 
@@ -35,25 +42,29 @@ const EMPTY_HINT_TEXT = `\
 >
 > > 중첩 인용문 — 들여쓰기 누적
 
-## 외부 링크 (사이클 7)
-
-[GitHub](https://github.com) — 클릭 시 시스템 브라우저로 열림. hover 시 URL 툴팁.
-
-## 코드·GFM (사이클 5·6)
+### 코드 예제 (사이클 6)
 
 \`\`\`typescript
 const greeting: string = "안녕하세요";
 console.log(greeting);
 \`\`\`
 
+## 외부 링크 (사이클 7)
+
+[GitHub](https://github.com) — 클릭 시 시스템 브라우저로 열림. hover 시 URL 툴팁.
+
+## 코드·GFM (사이클 5·6)
+
 | 기능 | 상태 |
 |:-----|:----:|
 | 표 | ✅ |
 | 인용문 | ✅ |
+| 목차 사이드바 | ✅ |
 
 - [x] 사이클 5 GFM
 - [x] 사이클 6 shiki
 - [x] 사이클 7 image/link/quote
+- [x] 사이클 8 TOC 사이드바
 `;
 
 const EMPTY_DOCUMENT = parseMarkdown(EMPTY_HINT_TEXT, undefined);
@@ -61,6 +72,25 @@ const EMPTY_DOCUMENT = parseMarkdown(EMPTY_HINT_TEXT, undefined);
 function AppInner(): JSX.Element {
   const document = useDocumentStore((s) => s.document);
   const setDocument = useDocumentStore((s) => s.setDocument);
+  const visible = useSidebarVisible();
+  const toggle = useSidebarToggle();
+  // CR8-2: document가 바뀔 때만 parseMarkdown 재실행 (사이드바 토글 등 무관 렌더 차단)
+  const rendererDocument = useMemo(
+    () => (document ? parseMarkdown(document.rawText, document.path) : EMPTY_DOCUMENT),
+    [document],
+  );
+
+  // CR8-1: ref callback 패턴 — article DOM이 실제로 마운트/교체될 때 articleRef를 안전하게 갱신한다.
+  // useEffect + 의존성 배열 없음 방식은 매 렌더마다 실행되므로 ref callback으로 교체한다.
+  // mainNodeRef: ⌘2 포커스용 HTMLElement 참조 (ref callback으로 유지)
+  const mainNodeRef = useRef<HTMLElement | null>(null);
+  const articleRef = useRef<Element | null>(null);
+  const mainCallbackRef = useCallback((node: HTMLElement | null) => {
+    mainNodeRef.current = node;
+    articleRef.current = node ? node.querySelector('article') : null;
+  }, []);
+
+  const activeAnchor = useScrollSpy(rendererDocument.headings, articleRef);
 
   // main 메뉴 ⌘O → main이 api:openFile IPC를 push하면 여기서 처리
   useEffect(() => {
@@ -76,33 +106,58 @@ function AppInner(): JSX.Element {
     return cleanup;
   }, [setDocument]);
 
-  // ⌘O 키보드 단축키 — 메뉴와 중복이지만 렌더러 직접 처리도 지원
+  // 키보드 단축키 — ⌘O·⌘1·⌘2
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent): void {
-      if ((event.metaKey || event.ctrlKey) && event.key === 'o') {
+      if (!event.metaKey) return;
+
+      if (event.key === 'o') {
         event.preventDefault();
         void window.api.openFile().then((result) => {
           if (result?.ok) {
             setDocument(result.document);
           }
         });
+      } else if (event.key === '1') {
+        event.preventDefault();
+        toggle();
+      } else if (event.key === '2') {
+        event.preventDefault();
+        mainNodeRef.current?.focus();
       }
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setDocument]);
+  }, [setDocument, toggle]);
 
   function handleFileDrop(doc: DocumentData): void {
     setDocument(doc);
   }
 
-  const rendererDocument = document
-    ? parseMarkdown(document.rawText, document.path)
-    : EMPTY_DOCUMENT;
+  function handleJump(anchor: string): void {
+    const article = articleRef.current;
+    if (article) {
+      scrollToAnchor(anchor, article);
+    }
+  }
 
   return (
     <DropZone onFileDrop={handleFileDrop}>
-      <MarkdownRenderer document={rendererDocument} />
+      <div className="md-layout">
+        <SidebarToggleButton />
+        {visible && (
+          <aside className="md-sidebar">
+            <SidebarView
+              outline={rendererDocument.outline}
+              activeAnchor={activeAnchor}
+              onJump={handleJump}
+            />
+          </aside>
+        )}
+        <main className="md-main" ref={mainCallbackRef} tabIndex={-1}>
+          <MarkdownRenderer document={rendererDocument} />
+        </main>
+      </div>
     </DropZone>
   );
 }

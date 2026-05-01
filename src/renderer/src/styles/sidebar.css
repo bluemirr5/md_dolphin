@@ -1,0 +1,100 @@
+/* sidebar.css — 목차 사이드바 레이아웃·스타일
+ * 설계 제약: CSS 변수 신규 추가 0건 (사이클 4 동결). 기존 변수만 참조.
+ * aside.md-sidebar: sticky, 100vh, 240px 고정폭 */
+
+/* 앱 전체 레이아웃 — 사이드바 + 본문 2-column flex */
+.md-layout {
+  display: flex;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+aside.md-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  width: 240px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--code-bg);
+  background-color: var(--bg);
+}
+
+main.md-main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+/* 사이드바 표시/숨기기 토글 버튼 */
+.md-sidebar-toggle {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  padding: 4px 8px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--code-bg);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.md-sidebar-toggle:hover,
+.md-sidebar-toggle:focus-visible {
+  background: var(--code-bg);
+  outline: 2px solid var(--quote-bar);
+  outline-offset: 2px;
+}
+
+/* 사이드바 내비게이션 */
+.md-sidebar__nav {
+  padding: 8px 0;
+  padding-top: 40px; /* 토글 버튼 아래 여백 */
+}
+
+.md-sidebar__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.md-sidebar__item {
+  margin: 0;
+}
+
+.md-sidebar__link {
+  display: block;
+  width: 100%;
+  padding: 4px 12px;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.75;
+}
+
+.md-sidebar__link:hover,
+.md-sidebar__link:focus-visible {
+  opacity: 1;
+  background: var(--code-bg);
+  outline: none;
+}
+
+/* 활성 항목 강조 — --quote-bar 좌측 border */
+.md-sidebar__link--active {
+  opacity: 1;
+  border-left: 2px solid var(--quote-bar);
+  padding-left: calc(12px - 2px);
+}
+
+/* 사이드바 트랜지션: 언마운트 패턴(조건부 렌더)과 transition이 공존하면 동작하지 않아 제거.
+ * width: 0 슬라이드-인 애니메이션은 사이클 10에서 a11y와 함께 처리 예정. */
