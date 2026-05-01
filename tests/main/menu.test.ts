@@ -32,6 +32,8 @@ vi.mock('electron', () => {
     name: 'md_dolphin',
     isPackaged: false,
     whenReady: vi.fn().mockResolvedValue(undefined),
+    // 사이클 10: i18n lookup을 위해 locale 반환 (en → 영어 라벨 테스트)
+    getLocale: vi.fn().mockReturnValue('en'),
   };
 
   const BrowserWindow = {
@@ -104,7 +106,8 @@ describe('installMenu — 메뉴 구조', () => {
     expect(fileMenu).toBeDefined();
 
     const submenu = fileMenu?.submenu as Electron.MenuItemConstructorOptions[] | undefined;
-    const openItem = submenu?.find((i) => i.label === 'Open…');
+    // 사이클 10: i18n 라벨 ('Open...' — en.json menu.file.open)
+    const openItem = submenu?.find((i) => typeof i.label === 'string' && i.label.startsWith('Open'));
     expect(openItem).toBeDefined();
     expect(openItem?.accelerator).toBe('CmdOrCtrl+O');
   });
@@ -116,7 +119,8 @@ describe('installMenu — 메뉴 구조', () => {
     const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
     const fileMenu = items.find((m) => m.label === 'File');
     const submenu = fileMenu?.submenu as Electron.MenuItemConstructorOptions[] | undefined;
-    const printItem = submenu?.find((i) => i.label === 'Print…');
+    // 사이클 10: i18n 라벨 ('Print...' — en.json menu.file.print)
+    const printItem = submenu?.find((i) => typeof i.label === 'string' && i.label.startsWith('Print'));
     expect(printItem).toBeDefined();
     expect(printItem?.accelerator).toBe('CmdOrCtrl+P');
   });
@@ -128,7 +132,8 @@ describe('installMenu — 메뉴 구조', () => {
     const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
     const fileMenu = items.find((m) => m.label === 'File');
     const submenu = fileMenu?.submenu as Electron.MenuItemConstructorOptions[] | undefined;
-    const pdfItem = submenu?.find((i) => i.label === 'Save as PDF…');
+    // 사이클 10: i18n 라벨 ('Save as PDF...' — en.json menu.file.saveAsPdf)
+    const pdfItem = submenu?.find((i) => typeof i.label === 'string' && i.label.startsWith('Save as PDF'));
     expect(pdfItem).toBeDefined();
     expect(pdfItem?.accelerator).toBe('Shift+CmdOrCtrl+P');
   });
@@ -271,7 +276,7 @@ describe('installMenu — 메뉴 클릭 헬퍼 직접 호출 (CR9.2-1)', () => {
 
     const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
     const fileSubmenu = getFileSubmenu(items);
-    const printItem = fileSubmenu?.find((i) => i.label === 'Print…');
+    const printItem = fileSubmenu?.find((i) => typeof i.label === 'string' && i.label.startsWith('Print'));
 
     (printItem?.click as () => void)?.();
 
@@ -285,7 +290,7 @@ describe('installMenu — 메뉴 클릭 헬퍼 직접 호출 (CR9.2-1)', () => {
 
     const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
     const fileSubmenu = getFileSubmenu(items);
-    const pdfItem = fileSubmenu?.find((i) => i.label === 'Save as PDF…');
+    const pdfItem = fileSubmenu?.find((i) => typeof i.label === 'string' && i.label.startsWith('Save as PDF'));
 
     (pdfItem?.click as () => void)?.();
 

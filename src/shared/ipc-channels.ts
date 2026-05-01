@@ -48,3 +48,14 @@ export const API_VIEW_TOGGLE_SIDEBAR = 'view:toggle-sidebar' as const;
 
 /** main → renderer: 문서 영역 포커스 */
 export const API_VIEW_FOCUS_ARTICLE = 'view:focus-article' as const;
+
+// ── 사이클 10 신규 채널 ────────────────────────────────────────────────────────
+
+/** renderer → main: 파일 stat 사전 확인 (10MB 모달용) */
+export const API_FILE_STAT = 'file:stat' as const;
+
+/** renderer → main: 시스템 locale 조회 */
+export const API_GET_LOCALE = 'api:getLocale' as const;
+
+/** main → renderer: 줌 레벨 변경 푸시 (--font-scale 갱신용) */
+export const API_VIEW_ZOOM_CHANGED = 'view:zoom-changed' as const;

@@ -10,6 +10,7 @@ export default defineConfig({
     environmentMatchGlobs: [
       ['tests/markdown/**', 'jsdom'],
       ['tests/components/**', 'jsdom'],
+      ['tests/renderer/**', 'jsdom'],
     ],
     include: ['tests/**/*.test.{ts,tsx}'],
     setupFiles: ['tests/markdown/setup.ts'],

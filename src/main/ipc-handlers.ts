@@ -1,6 +1,6 @@
 // IPC 핸들러 등록 — ipcMain.handle 으로 renderer 요청을 처리한다.
 // 모든 throw는 OpenedFileError 형태로 정규화하여 renderer에 반환 (설계 제약)
-import { ipcMain, shell, BrowserWindow } from 'electron';
+import { ipcMain, shell, BrowserWindow, app } from 'electron';
 import {
   API_OPEN_FILE,
   API_READ_FILE,
@@ -8,9 +8,12 @@ import {
   API_GET_THEME,
   API_THEME_UPDATED,
   API_GET_WINDOW_ID,
+  API_FILE_STAT,
+  API_GET_LOCALE,
 } from '@shared/ipc-channels';
 import type { FileService } from './file-service';
 import type { DocumentWindowManager } from './document-window';
+import { assertWithinBaseDir } from './path-guard';
 import { dirname } from 'node:path';
 import { getCurrentTheme, watchTheme } from './theme-service';
 import type { ThemeUpdatePayload } from '@shared/theme-types';
@@ -113,6 +116,20 @@ export function registerIpcHandlers(
   // api:getTheme — 현재 resolved 테마 반환 (invoke)
   ipcMain.handle(API_GET_THEME, () => getCurrentTheme());
 
+  // file:stat — 파일 크기 사전 확인 (10MB 모달용)
+  // CR10-3: baseDir 지정된 윈도우에서는 path-guard 검증 수행 (traversal 보안 우회 차단)
+  ipcMain.handle(API_FILE_STAT, async (event, filePath: string) => {
+    const win = findWindowByWebContents(event.sender);
+    const baseDir = win ? windowManager.get(win)?.baseDir : undefined;
+    if (baseDir !== undefined) {
+      await assertWithinBaseDir(filePath, baseDir);
+    }
+    return fileService.statFile(filePath);
+  });
+
+  // api:getLocale — 시스템 locale 반환 (i18n 초기화용)
+  ipcMain.handle(API_GET_LOCALE, () => app.getLocale());
+
   // api:getWindowId — preload에서 sendSync로 호출, BrowserWindow.id를 동기 반환 (P7-10)
   // ipcMain.handle(async)이 아닌 ipcMain.on + event.returnValue를 사용해야 sendSync 응답 가능
   ipcMain.on(API_GET_WINDOW_ID, (event) => {
@@ -132,6 +149,8 @@ export function registerIpcHandlers(
     ipcMain.removeHandler(API_OPEN_EXTERNAL);
     ipcMain.removeHandler(API_GET_THEME);
     ipcMain.removeAllListeners(API_GET_WINDOW_ID);
+    ipcMain.removeHandler(API_FILE_STAT);
+    ipcMain.removeHandler(API_GET_LOCALE);
   };
 }
 

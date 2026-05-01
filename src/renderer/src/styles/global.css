@@ -1,0 +1,21 @@
+/* global.css — 전역 스타일 (접근성·리셋)
+ * 사이클 10: prefers-reduced-motion 지원 (AC6)
+ *   - 부드러운 스크롤·애니메이션 비활성
+ *   - 코드블록 복사 토스트(사이클 6) 페이드도 영향
+ */
+
+/* prefers-reduced-motion: reduce 환경에서 모든 애니메이션·전환 비활성 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

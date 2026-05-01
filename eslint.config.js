@@ -5,7 +5,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
 export default [
-  { ignores: ['out/**', 'dist/**', 'node_modules/**', '**/*.config.{js,ts}'] },
+  { ignores: ['out/**', 'dist/**', 'node_modules/**', '**/*.config.{js,ts}', 'scripts/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   {

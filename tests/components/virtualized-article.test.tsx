@@ -6,39 +6,52 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import { createRef, type ReactNode } from 'react';
+import React from 'react';
+import type * as ReactType from 'react';
 import { VirtualizedArticle } from '../../src/renderer/src/components/VirtualizedArticle';
 
 // react-virtuoso mock — Virtuoso를 단순 목록 렌더로 대체해 RTL 테스트 가능하게 함
-vi.mock('react-virtuoso', () => {
+// vi.mock factory async + vi.importActual('react')로 forwardRef 사용 가능 (AC10)
+vi.mock('react-virtuoso', async () => {
+  const reactModule = await vi.importActual<typeof ReactType>('react');
+  const { forwardRef: fwd } = reactModule;
+
+  const VirtuosoImpl = fwd<{
+    data: unknown[];
+    itemContent: (index: number, item: unknown) => ReactNode;
+    components?: { Scroller?: React.ComponentType<{ children?: ReactNode; [key: string]: unknown }> };
+    rangeChanged?: (range: { startIndex: number; endIndex: number }) => void;
+  }, unknown>(function Virtuoso({
+    data,
+    itemContent,
+    components,
+    rangeChanged,
+  }: {
+    data: unknown[];
+    itemContent: (index: number, item: unknown) => ReactNode;
+    components?: { Scroller?: React.ComponentType<{ children?: ReactNode; [key: string]: unknown }> };
+    rangeChanged?: (range: { startIndex: number; endIndex: number }) => void;
+  }, _ref) {
+    // rangeChanged 시뮬레이션 — mount 시 0~data.length-1 범위로 호출
+    if (rangeChanged && data.length > 0) {
+      rangeChanged({ startIndex: 0, endIndex: data.length - 1 });
+    }
+
+    const Scroller = components?.Scroller;
+    const items = data.map((item, i) => (
+      <div key={i} data-testid={`virtuoso-item-${i}`}>
+        {itemContent(i, item)}
+      </div>
+    ));
+
+    if (Scroller) {
+      return <Scroller>{items}</Scroller>;
+    }
+    return <div data-testid="virtuoso-root">{items}</div>;
+  });
+
   return {
-    Virtuoso: ({
-      data,
-      itemContent,
-      components,
-      rangeChanged,
-    }: {
-      data: unknown[];
-      itemContent: (index: number, item: unknown) => ReactNode;
-      components?: { Scroller?: React.ComponentType<{ children?: ReactNode; [key: string]: unknown }> };
-      rangeChanged?: (range: { startIndex: number; endIndex: number }) => void;
-    }) => {
-      // rangeChanged 시뮬레이션 — mount 시 0~data.length-1 범위로 호출
-      if (rangeChanged && data.length > 0) {
-        rangeChanged({ startIndex: 0, endIndex: data.length - 1 });
-      }
-
-      const Scroller = components?.Scroller;
-      const items = data.map((item, i) => (
-        <div key={i} data-testid={`virtuoso-item-${i}`}>
-          {itemContent(i, item)}
-        </div>
-      ));
-
-      if (Scroller) {
-        return <Scroller>{items}</Scroller>;
-      }
-      return <div data-testid="virtuoso-root">{items}</div>;
-    },
+    Virtuoso: VirtuosoImpl,
     VirtuosoHandle: {},
   };
 });

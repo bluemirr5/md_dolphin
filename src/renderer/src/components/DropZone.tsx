@@ -4,15 +4,24 @@
 //   - renderer에서 File.path 직접 접근 금지 → api.getDroppedFilePath(file) 사용
 //   - 다중 파일 드롭: 첫 파일만 처리, 나머지 무시 + console.warn
 //   - aria: role="region" + aria-label="Drop markdown file here"
+// CR10-4: onFileDropError 콜백 추가 — 파일 읽기 실패 시 App.tsx에 에러 분기 위임
 import type { DragEvent, ReactNode } from 'react';
 import type { DocumentData } from '../store/document-store';
+import type { FileErrorKind } from '../../../main/file-service';
 
 interface DropZoneProps {
   readonly children: ReactNode;
   readonly onFileDrop: (document: DocumentData) => void;
+  readonly onFileDropError?: (kind: FileErrorKind, pathHint?: string) => void;
 }
 
-export function DropZone({ children, onFileDrop }: DropZoneProps): JSX.Element {
+/** 구 API OpenedFileResult.code → FileErrorKind 변환 (App.tsx 헬퍼와 동일 로직) */
+function openedFileCodeToKind(code: string): FileErrorKind {
+  if (code === 'EACCES' || code === 'OUTSIDE_BASE_DIR') return 'permission';
+  return 'io';
+}
+
+export function DropZone({ children, onFileDrop, onFileDropError }: DropZoneProps): JSX.Element {
   function handleDragOver(event: DragEvent<HTMLDivElement>): void {
     event.preventDefault();
     event.stopPropagation();
@@ -39,7 +48,11 @@ export function DropZone({ children, onFileDrop }: DropZoneProps): JSX.Element {
       if (result.ok) {
         onFileDrop(result.document);
       } else {
-        console.error('[DropZone] 파일 읽기 실패:', result.code, result.message);
+        if (onFileDropError) {
+          onFileDropError(openedFileCodeToKind(result.code), filePath);
+        } else {
+          console.error('[DropZone] 파일 읽기 실패:', result.code, result.message);
+        }
       }
     });
   }

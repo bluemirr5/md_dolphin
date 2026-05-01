@@ -1,17 +1,28 @@
 // zoom-ipc.ts — 줌 레벨 IPC 핸들러
-// AC5: ⌘+/⌘- 5회 누적 시 클램프(+3/-3), ⌘0 → 0 복귀
+// 사이클 9: AC5: ⌘+/⌘- 5회 누적 시 클램프(+3/-3), ⌘0 → 0 복귀
+// 사이클 10: setZoomFactor를 1.0으로 고정 — CSS --font-scale 단일 진입점 (P10-4)
+//   줌 레벨 변경 시 view:zoom-changed 이벤트로 renderer에 푸시 → zoom-bridge.ts가 --font-scale 갱신
 // windowId -1 sentinel 시 IPC noop + console.warn 1회 (CR7-11)
 import { ipcMain, webContents } from 'electron';
 import {
   API_VIEW_ZOOM_IN,
   API_VIEW_ZOOM_OUT,
   API_VIEW_ZOOM_RESET,
+  API_VIEW_ZOOM_CHANGED,
 } from '@shared/ipc-channels';
 
 // Electron 권고 줌 범위: -3~+3 (약 50%~300%)
 const ZOOM_STEP = 0.5;
 const ZOOM_MIN = -3;
 const ZOOM_MAX = 3;
+
+/** 윈도우별 줌 레벨 상태 (webContents.id → zoomLevel) */
+const zoomLevels = new Map<number, number>();
+
+/** 테스트용: 줌 레벨 상태 초기화 */
+export function _resetZoomLevelsForTest(): void {
+  zoomLevels.clear();
+}
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -29,15 +40,21 @@ function resolveWebContents(senderId: number): Electron.WebContents | null {
 /**
  * BrowserWindow의 webContents에 직접 줌을 적용한다.
  * delta > 0 → Zoom In, delta < 0 → Zoom Out, delta === 0 → Reset(0)
+ *
+ * 사이클 10: setZoomFactor는 1.0으로 고정.
+ * CSS --font-scale 갱신은 view:zoom-changed 이벤트로 renderer에 위임.
  * menu.ts에서 메뉴 클릭 핸들러가 ipcMain.handle 우회 없이 직접 호출.
  */
 export function applyZoom(wc: Electron.WebContents, delta: number): void {
-  if (delta === 0) {
-    wc.setZoomLevel(0);
-    return;
-  }
-  const current = wc.getZoomLevel();
-  wc.setZoomLevel(clamp(current + delta, ZOOM_MIN, ZOOM_MAX));
+  const current = zoomLevels.get(wc.id) ?? 0;
+  const next = delta === 0 ? 0 : clamp(current + delta, ZOOM_MIN, ZOOM_MAX);
+  zoomLevels.set(wc.id, next);
+
+  // setZoomFactor는 1.0 고정 (P10-4: CSS --font-scale 단일 진입점)
+  wc.setZoomFactor(1.0);
+
+  // renderer에 줌 레벨 변경 푸시 → zoom-bridge.ts가 --font-scale 계산
+  wc.send(API_VIEW_ZOOM_CHANGED, next);
 }
 
 export function registerZoomIpc(): () => void {

@@ -1,0 +1,68 @@
+{
+  "menu": {
+    "app": {
+      "about": "About md_dolphin",
+      "services": "Services",
+      "hide": "Hide md_dolphin",
+      "hideOthers": "Hide Others",
+      "unhide": "Show All",
+      "quit": "Quit md_dolphin"
+    },
+    "file": {
+      "open": "Open...",
+      "print": "Print...",
+      "saveAsPdf": "Save as PDF...",
+      "close": "Close",
+      "label": "File"
+    },
+    "edit": {
+      "label": "Edit"
+    },
+    "view": {
+      "label": "View",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "actualSize": "Actual Size",
+      "toggleSidebar": "Toggle Sidebar",
+      "focusArticle": "Focus Article"
+    },
+    "window": {
+      "label": "Window"
+    },
+    "help": {
+      "label": "Help"
+    }
+  },
+  "errors": {
+    "permission": "Cannot access this file. Please check file permissions.",
+    "encoding": "Cannot recognize the file encoding.",
+    "notMarkdown": "Cannot read the Markdown file. The file may be corrupted.",
+    "tooLarge": "The file is too large (over 10MB). You can choose to continue opening it.",
+    "empty": "The file is empty.",
+    "io": "An error occurred while reading the file.",
+    "retry": "Retry",
+    "cancel": "Cancel"
+  },
+  "dialog": {
+    "openFile": "Open File",
+    "savePdf": "Save PDF",
+    "largeFile": {
+      "title": "Large File",
+      "message": "This file exceeds 10MB. Do you want to continue?",
+      "continue": "Continue",
+      "cancel": "Cancel"
+    }
+  },
+  "a11y": {
+    "sidebar": {
+      "outline": "Document Outline",
+      "nav": "Outline Navigation"
+    },
+    "article": {
+      "main": "Document Content"
+    },
+    "outline": {
+      "empty": "No outline available."
+    }
+  }
+}

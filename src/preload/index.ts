@@ -19,8 +19,11 @@ import {
   API_VIEW_SAVE_PDF,
   API_VIEW_TOGGLE_SIDEBAR,
   API_VIEW_FOCUS_ARTICLE,
+  API_FILE_STAT,
+  API_GET_LOCALE,
+  API_VIEW_ZOOM_CHANGED,
 } from '@shared/ipc-channels';
-import type { OpenedFileResult } from '../main/file-service';
+import type { OpenedFileResult, StatResult } from '../main/file-service';
 import type { RenderingTheme, ThemeUpdatePayload } from '@shared/theme-types';
 
 const api = {
@@ -119,6 +122,32 @@ const api = {
     const handler = () => callback();
     ipcRenderer.on(API_VIEW_FOCUS_ARTICLE, handler);
     return () => { ipcRenderer.removeListener(API_VIEW_FOCUS_ARTICLE, handler); };
+  },
+
+  // ── 사이클 10 신규 IPC ────────────────────────────────────────────────────────
+
+  /**
+   * 파일 stat 사전 확인 — 10MB 초과 여부를 renderer가 모달로 확인하기 전에 호출.
+   * file:stat IPC 화이트리스트 추가 (설계 제약 P10-8).
+   */
+  fileStat: (filePath: string): Promise<StatResult> =>
+    ipcRenderer.invoke(API_FILE_STAT, filePath) as Promise<StatResult>,
+
+  /**
+   * 시스템 locale 조회 — app.getLocale() 결과를 renderer에 노출.
+   * i18n 초기화 시 사용.
+   */
+  getLocale: (): Promise<string> =>
+    ipcRenderer.invoke(API_GET_LOCALE) as Promise<string>,
+
+  /**
+   * main → renderer: 줌 레벨 변경 이벤트 구독.
+   * zoom-bridge.ts가 --font-scale CSS 변수 갱신에 사용.
+   */
+  onZoomChanged: (callback: (zoomLevel: number) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, zoomLevel: number) => callback(zoomLevel);
+    ipcRenderer.on(API_VIEW_ZOOM_CHANGED, handler);
+    return () => { ipcRenderer.removeListener(API_VIEW_ZOOM_CHANGED, handler); };
   },
 
   // bench:cold-start — dev only (process.env.NODE_ENV !== 'production')

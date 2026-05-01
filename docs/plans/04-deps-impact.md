@@ -39,7 +39,10 @@
 | **DOMPurify@3.4.1** (사이클 7) / sanitize-html | XSS 방어 손실 — 보안 치명적                | 사이클 7부터 DOMPurify 도입. 자체 `.d.ts` 동봉이라 `@types/dompurify` 불요. 둘 다 활성 유지보수. |
 | **react-virtuoso**               | 큰 파일 성능 저하                          | `react-window` 또는 자체 가상화 구현                                                      |
 | **Pretendard 폰트** (OFL)        | 폰트 누락 시 시스템 폰트 fallback          | Apple SD Gothic Neo로 우아하게 대체                                                       |
-| **i18next**                      | 다국어 손실                                | react-intl로 대체 가능                                                                    |
+| **i18next@^26** (사이클 10)      | 다국어 손실                                | react-intl로 대체 가능. 사이클 10에서 v26 도입(스펙 ^23 예정이었으나 v26 상향)               |
+| **react-i18next@^17** (사이클 10) | 다국어 손실                                | 사이클 10에서 v17 도입(스펙 ^14 예정이었으나 v17 상향)                                     |
+| **iconv-lite@^0.6.x** (사이클 10) | 인코딩 감지 불가 — fallback만 가능        | 문자 손상 에러로 사용자 불편. 대안 없음(Node 내장 UTF-8 외 미지원). 32MB 입력 상한으로 BOMB 방어. |
+| **@axe-core/react@^4.x** (사이클 10, dev only) | a11y 검증 미수행                           | dev 환경만 로드. production tree-shake로 번들 미포함. CR9-S1 verify-prod-bundle로 검증.    |
 | **electron-builder**             | 패키징 실패                                | electron-forge로 대체 (사이클 11a에서 결정 게이트)                                        |
 | **GitHub Releases (배포 채널)**  | 다운로드 불가                              | Homebrew Cask 채널 병행. Cloudflare R2 자체 호스팅도 옵션                                 |
 | **Homebrew Cask**                | 설치 자동화 채널 손실                      | GitHub Releases 직접 다운로드로 우회                                                      |

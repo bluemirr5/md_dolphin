@@ -1,11 +1,15 @@
 // menu.ts — macOS Application Menu
 // 사이클 9: 6 메뉴 구성 (App/File/Edit/View/Window/Help)
+// 사이클 10: 라벨 하드코딩 → i18n-lookup helper로 치환 (P10-1)
+//   - main에는 i18next 풀 인스턴스 미생성, lookup helper 사용
+//   - macOS 분기는 src/shared/platform.ts 경유 유지
 // File: Open(⌘O)·Print(⌘P)·Save as PDF(⇧⌘P)·Close(⌘W)
 // View: Zoom In(⌘+)·Zoom Out(⌘-)·Actual Size(⌘0)·Toggle Sidebar(⌘1)·Focus Article(⌘2)
 // Window/Edit/Help: 표준 role
 // ⌘1/⌘2: menu accelerator → IPC push (사이클 8 keydown handler와 동일 채널 사용 — 충돌 없음)
 import { app, Menu, BrowserWindow } from 'electron';
 import { API_DOCUMENT_OPENED, API_VIEW_TOGGLE_SIDEBAR, API_VIEW_FOCUS_ARTICLE } from '@shared/ipc-channels';
+import { lookup, normalizeMainLocale } from '@shared/i18n-lookup';
 import type { FileService } from './file-service';
 import type { DocumentWindowManager } from './document-window';
 import { applyZoom } from './zoom-ipc';
@@ -15,6 +19,7 @@ import { dirname } from 'node:path';
 /**
  * Application Menu를 설치한다.
  * macOS 분기는 App 메뉴 등록부에서만 process.platform === 'darwin' 직참조 1회 허용.
+ * 메뉴 라벨은 i18n-lookup helper로 locale에 맞게 치환한다.
  *
  * @param fileService     파일 열기 서비스
  * @param windowManager   윈도우별 baseDir 관리
@@ -25,6 +30,10 @@ export function installMenu(
   windowManager: DocumentWindowManager,
   getFocusedWindow: () => BrowserWindow | null = () => BrowserWindow.getFocusedWindow(),
 ): void {
+  // app.getLocale()을 ko/en으로 정규화
+  const locale = normalizeMainLocale(app.getLocale());
+  const t = (key: string) => lookup(locale, key);
+
   const template: Electron.MenuItemConstructorOptions[] = [];
 
   // macOS App 메뉴 — process.platform === 'darwin' 직참조 1회 허용 (Electron 표준)
@@ -47,10 +56,10 @@ export function installMenu(
 
   // File 메뉴
   template.push({
-    label: 'File',
+    label: t('menu.file.label'),
     submenu: [
       {
-        label: 'Open…',
+        label: t('menu.file.open'),
         accelerator: 'CmdOrCtrl+O',
         click: () => {
           const win = getFocusedWindow();
@@ -66,7 +75,7 @@ export function installMenu(
       },
       { type: 'separator' },
       {
-        label: 'Print…',
+        label: t('menu.file.print'),
         accelerator: 'CmdOrCtrl+P',
         click: () => {
           const win = getFocusedWindow();
@@ -75,7 +84,7 @@ export function installMenu(
         },
       },
       {
-        label: 'Save as PDF…',
+        label: t('menu.file.saveAsPdf'),
         accelerator: 'Shift+CmdOrCtrl+P',
         click: () => {
           const win = getFocusedWindow();
@@ -85,7 +94,7 @@ export function installMenu(
       },
       { type: 'separator' },
       {
-        label: 'Close',
+        label: t('menu.file.close'),
         accelerator: 'CmdOrCtrl+W',
         role: 'close',
       },
@@ -94,7 +103,7 @@ export function installMenu(
 
   // Edit 메뉴
   template.push({
-    label: 'Edit',
+    label: t('menu.edit.label'),
     submenu: [
       { role: 'undo' },
       { role: 'redo' },
@@ -108,10 +117,10 @@ export function installMenu(
 
   // View 메뉴 — zoom IPC + sidebar/article 토글
   template.push({
-    label: 'View',
+    label: t('menu.view.label'),
     submenu: [
       {
-        label: 'Zoom In',
+        label: t('menu.view.zoomIn'),
         accelerator: 'CmdOrCtrl+Plus',
         click: () => {
           const win = getFocusedWindow();
@@ -119,7 +128,7 @@ export function installMenu(
         },
       },
       {
-        label: 'Zoom Out',
+        label: t('menu.view.zoomOut'),
         accelerator: 'CmdOrCtrl+-',
         click: () => {
           const win = getFocusedWindow();
@@ -127,7 +136,7 @@ export function installMenu(
         },
       },
       {
-        label: 'Actual Size',
+        label: t('menu.view.actualSize'),
         accelerator: 'CmdOrCtrl+0',
         click: () => {
           const win = getFocusedWindow();
@@ -136,7 +145,7 @@ export function installMenu(
       },
       { type: 'separator' },
       {
-        label: 'Toggle Sidebar',
+        label: t('menu.view.toggleSidebar'),
         accelerator: 'CmdOrCtrl+1',
         click: () => {
           const win = getFocusedWindow();
@@ -144,7 +153,7 @@ export function installMenu(
         },
       },
       {
-        label: 'Focus Article',
+        label: t('menu.view.focusArticle'),
         accelerator: 'CmdOrCtrl+2',
         click: () => {
           const win = getFocusedWindow();
@@ -162,7 +171,7 @@ export function installMenu(
 
   // Window 메뉴 — 표준 role (macOS 일관성)
   template.push({
-    label: 'Window',
+    label: t('menu.window.label'),
     submenu: [
       { role: 'minimize' },
       { role: 'zoom' },

@@ -1,6 +1,14 @@
 /* typography.css — 본문 타이포그래피 (마스터 플랜 5.1)
  * 설계 제약: CSS 모듈 미사용, 글로벌 .md-content 셀렉터
- * 사이클 9 인쇄 미디어 쿼리(@media print)·가상화 스타일은 사이클 9에서 추가 */
+ * 사이클 9 인쇄 미디어 쿼리(@media print)·가상화 스타일은 사이클 9에서 추가
+ * 사이클 10: --font-scale 동적 스케일 변수 단일 진입점 (P10-4)
+ *   html { font-size: calc(16px * var(--font-scale, 1)) }
+ *   본문은 rem 기반 → 줌 IPC와 1:1 비례 확대 */
+
+/* 동적 폰트 스케일 — zoom-bridge.ts가 --font-scale 갱신 */
+html {
+  font-size: calc(16px * var(--font-scale, 1));
+}
 
 .md-content {
   /* 본문 레이아웃 */
@@ -8,9 +16,9 @@
   margin: 0 auto;
   padding: 32px 24px;
 
-  /* 기본 타이포그래피 */
+  /* 기본 타이포그래피 — rem 기반 (--font-scale과 연동) */
   font-family: -apple-system, 'SF Pro Text', system-ui, 'Apple SD Gothic Neo', Pretendard, sans-serif;
-  font-size: 17px;
+  font-size: 1.0625rem; /* 17px @ 16px base */
   line-height: 1.7;
   color: var(--text);
   background-color: var(--bg);
@@ -19,30 +27,30 @@
   letter-spacing: -0.01em;
 }
 
-/* 헤딩 크기 */
+/* 헤딩 크기 — rem 기반 (--font-scale과 연동) */
 .md-content h1 {
-  font-size: 32px;
+  font-size: 2rem; /* 32px @ 16px base */
   line-height: 1.25;
   margin-top: 2em;
   margin-bottom: 0.5em;
 }
 
 .md-content h2 {
-  font-size: 26px;
+  font-size: 1.625rem; /* 26px @ 16px base */
   line-height: 1.3;
   margin-top: 1.75em;
   margin-bottom: 0.5em;
 }
 
 .md-content h3 {
-  font-size: 20px;
+  font-size: 1.25rem; /* 20px @ 16px base */
   line-height: 1.4;
   margin-top: 1.5em;
   margin-bottom: 0.4em;
 }
 
 .md-content h4 {
-  font-size: 18px;
+  font-size: 1.125rem; /* 18px @ 16px base */
   line-height: 1.4;
   margin-top: 1.25em;
   margin-bottom: 0.4em;
@@ -70,7 +78,7 @@
   border-radius: 6px;
   overflow-x: auto;
   margin-bottom: 1.2em;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px @ 16px base */
   line-height: 1.6;
 }
 

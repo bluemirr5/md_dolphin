@@ -48,5 +48,12 @@ interface Window {
     readonly onToggleSidebar: (callback: () => void) => () => void;
     /** main → renderer: 문서 영역 포커스 이벤트 구독 */
     readonly onFocusArticle: (callback: () => void) => () => void;
+    // 사이클 10 신규 IPC
+    /** 파일 stat 사전 확인 — 10MB 초과 여부 (LargeFileWarning 모달용) */
+    readonly fileStat: (filePath: string) => Promise<{ size: number; tooLarge: boolean }>;
+    /** 시스템 locale 조회 — app.getLocale() 결과 */
+    readonly getLocale: () => Promise<string>;
+    /** main → renderer: 줌 레벨 변경 이벤트 구독 */
+    readonly onZoomChanged: (callback: (zoomLevel: number) => void) => () => void;
   };
 }

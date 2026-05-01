@@ -1,6 +1,8 @@
 // SidebarView — outline 트리를 nav/ul 재귀 렌더
 // H1~H4만 표시, H5/H6는 비표시 (P8-2: level <= 4 필터)
 // 들여쓰기: padding-inline-start: calc((level - 1) * 12px)
+// 사이클 10: ARIA 보강 (P8-4) — 빈 outline 시 role="status" 메시지
+import { useTranslation } from 'react-i18next';
 import type { Outline, OutlineNode } from '@shared/markdown/heading';
 
 interface SidebarViewProps {
@@ -43,8 +45,21 @@ function NodeList({ nodes, activeAnchor, onJump }: NodeListProps): JSX.Element |
 }
 
 export function SidebarView({ outline, activeAnchor, onJump }: SidebarViewProps): JSX.Element {
+  const { t } = useTranslation();
+
+  const hasContent = outline.root.some((n) => n.heading.level <= 4);
+
   return (
-    <nav aria-label="문서 목차" className="md-sidebar__nav">
+    <nav
+      aria-label={t('a11y.sidebar.outline')}
+      className="md-sidebar__nav"
+    >
+      {/* P8-4: 빈 outline 시 role="status" 접근성 메시지 */}
+      {!hasContent && (
+        <p role="status" className="md-sidebar__empty">
+          {t('a11y.outline.empty')}
+        </p>
+      )}
       <NodeList nodes={outline.root} activeAnchor={activeAnchor} onJump={onJump} />
     </nav>
   );
