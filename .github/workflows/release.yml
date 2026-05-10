@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-
+
+      - name: Cache Electron binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/electron
+          key: electron-${{ hashFiles('package.json') }}
+          restore-keys: |
+            electron-
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm typecheck && pnpm lint && pnpm test
+
+      - name: Render release notes
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          sed "s/\${version}/$VERSION/g" release/release-notes.template.md > release/release-notes.md
+
+      - name: Build DMG (start)
+        run: |
+          echo "::notice::dist 시작 $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          pnpm dist
+          echo "::notice::dist 종료 $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+
+      - run: pnpm dist:checksum
+
+      - name: Upload to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*.dmg
+            release/SHA256SUMS.txt
+            release/latest-mac.yml
+          body_path: release/release-notes.md
+
+      - name: Update Homebrew cask
+        env:
+          TAP_UPDATE_TOKEN: ${{ secrets.TAP_UPDATE_TOKEN }}
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          SHA256=$(grep "md_dolphin-${VERSION}-mac-universal.dmg" release/SHA256SUMS.txt | awk '{print $1}')
+
+          git clone "https://x-access-token:${TAP_UPDATE_TOKEN}@github.com/bluemirr5/homebrew-md-dolphin.git" /tmp/tap
+
+          CASK=/tmp/tap/Casks/md-dolphin.rb
+          sed -i '' "s/version \"[^\"]*\"/version \"${VERSION}\"/" "$CASK"
+          sed -i '' "s/sha256 .*/sha256 \"${SHA256}\"/" "$CASK"
+
+          cd /tmp/tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/md-dolphin.rb
+          git commit -m "chore: bump md-dolphin to ${VERSION}"
+          git push

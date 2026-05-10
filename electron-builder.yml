@@ -1,0 +1,47 @@
+appId: com.bluemirr5.md-dolphin
+productName: MD Dolphin
+
+directories:
+  output: release/
+
+files:
+  - out/**/*
+  - '!**/*.map'
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  category: public.app-category.productivity
+  # mac.entitlements 키 미설정 — Phase 2 P2-1에서 hardened runtime 활성 시 설정 예정
+  # 현 사이클은 미서명 빌드(mac.identity: null). entitlements.plist는 stub만 존재
+  identity: null
+  extendInfo:
+    CFBundleDocumentTypes:
+      - CFBundleTypeName: Markdown
+        CFBundleTypeExtensions:
+          - md
+          - markdown
+        CFBundleTypeRole: Editor
+        LSHandlerRank: Default
+
+dmg:
+  title: 'md_dolphin ${version}'
+  contents:
+    - x: 130
+      y: 220
+      type: file
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+
+compression: maximum
+artifactName: 'md_dolphin-${version}-mac-universal.${ext}'
+
+publish:
+  provider: github
+  owner: bluemirr5
+  repo: md_dolphin

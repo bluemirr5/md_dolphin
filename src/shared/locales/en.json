@@ -1,0 +1,101 @@
+{
+  "menu": {
+    "app": {
+      "about": "About md_dolphin",
+      "services": "Services",
+      "hide": "Hide md_dolphin",
+      "hideOthers": "Hide Others",
+      "unhide": "Show All",
+      "quit": "Quit md_dolphin"
+    },
+    "file": {
+      "open": "Open...",
+      "print": "Print...",
+      "saveAsPdf": "Save as PDF...",
+      "close": "Close",
+      "label": "File"
+    },
+    "edit": {
+      "label": "Edit"
+    },
+    "view": {
+      "label": "View",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "actualSize": "Actual Size",
+      "toggleSidebar": "Toggle Sidebar",
+      "focusArticle": "Focus Article",
+      "toggleWide": "Toggle Wide Mode",
+      "theme": "Theme",
+      "revealThemesFolder": "Reveal Themes Folder"
+    },
+    "window": {
+      "label": "Window"
+    },
+    "help": {
+      "label": "Help"
+    }
+  },
+  "errors": {
+    "permission": {
+      "message": "Cannot access this file. Please check file permissions.",
+      "ariaLabel": "Permission error"
+    },
+    "encoding": {
+      "message": "Cannot recognize the file encoding.",
+      "ariaLabel": "Encoding error"
+    },
+    "notMarkdown": {
+      "message": "Cannot read the Markdown file. The file may be corrupted.",
+      "ariaLabel": "Markdown error"
+    },
+    "tooLarge": {
+      "message": "The file is too large (over 10MB). You can choose to continue opening it.",
+      "ariaLabel": "File size error"
+    },
+    "empty": {
+      "message": "The file is empty.",
+      "ariaLabel": "Empty file error"
+    },
+    "io": {
+      "message": "An error occurred while reading the file.",
+      "ariaLabel": "File read error"
+    },
+    "retry": "Retry",
+    "cancel": "Cancel"
+  },
+  "dialog": {
+    "openFile": "Open File",
+    "savePdf": "Save PDF",
+    "largeFile": {
+      "title": "Large File",
+      "message": "This file exceeds 10MB. Do you want to continue?",
+      "continue": "Continue",
+      "cancel": "Cancel"
+    }
+  },
+  "a11y": {
+    "sidebar": {
+      "outline": "Document Outline",
+      "nav": "Outline Navigation"
+    },
+    "article": {
+      "main": "Document Content"
+    },
+    "outline": {
+      "empty": "No outline available."
+    }
+  },
+  "welcome": {
+    "ariaLabel": "Welcome screen",
+    "tagline": "macOS Markdown viewer",
+    "dropzone": {
+      "primary": "Drop a .md file or click to open",
+      "shortcut": "or press ⌘O"
+    },
+    "recent": {
+      "title": "Recent files",
+      "removeAria": "Remove from recent files"
+    }
+  }
+}

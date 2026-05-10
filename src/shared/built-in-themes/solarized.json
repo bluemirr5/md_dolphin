@@ -1,0 +1,53 @@
+{
+  "name": "Solarized",
+  "light": {
+    "color.bg": "#FDF6E3",
+    "color.text": "#586E75",
+    "color.text.muted": "#93A1A1",
+    "color.code.bg": "#EEE8D5",
+    "color.quote.bar": "#B58900",
+    "color.heading.h1": "#073642",
+    "color.heading.h2": "#073642",
+    "color.heading.h3": "#586E75",
+    "color.heading.h4": "#586E75",
+    "color.link": "#268BD2",
+    "color.link.external": "#268BD2",
+    "color.link.tooltip.bg": "#073642",
+    "color.link.tooltip.text": "#FDF6E3",
+    "color.table.border": "#93A1A1",
+    "color.table.header.bg": "#EEE8D5",
+    "color.table.row.alt.bg": "#F5EFD8",
+    "color.image.fallback.border": "#93A1A1",
+    "color.image.caption.text": "#93A1A1",
+    "color.sidebar.bg": "#EEE8D5",
+    "color.sidebar.border": "#93A1A1",
+    "color.sidebar.link.active": "#B58900"
+  },
+  "dark": {
+    "color.bg": "#002B36",
+    "color.text": "#839496",
+    "color.text.muted": "#657B83",
+    "color.code.bg": "#073642",
+    "color.quote.bar": "#B58900",
+    "color.heading.h1": "#93A1A1",
+    "color.heading.h2": "#93A1A1",
+    "color.heading.h3": "#839496",
+    "color.heading.h4": "#839496",
+    "color.link": "#268BD2",
+    "color.link.external": "#268BD2",
+    "color.link.tooltip.bg": "#073642",
+    "color.link.tooltip.text": "#93A1A1",
+    "color.table.border": "#657B83",
+    "color.table.header.bg": "#073642",
+    "color.table.row.alt.bg": "#002B36",
+    "color.image.fallback.border": "#657B83",
+    "color.image.caption.text": "#657B83",
+    "color.sidebar.bg": "#002B36",
+    "color.sidebar.border": "#073642",
+    "color.sidebar.link.active": "#B58900"
+  },
+  "shiki": {
+    "light": "github-light",
+    "dark": "nord"
+  }
+}

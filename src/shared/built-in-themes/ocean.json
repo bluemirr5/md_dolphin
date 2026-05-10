@@ -1,0 +1,53 @@
+{
+  "name": "Ocean",
+  "light": {
+    "color.bg": "#F0F4FF",
+    "color.text": "#1A1A2E",
+    "color.text.muted": "#6B7A9F",
+    "color.code.bg": "#E4EAF8",
+    "color.quote.bar": "#4A90D9",
+    "color.heading.h1": "#0F2460",
+    "color.heading.h2": "#1565C0",
+    "color.heading.h3": "#00838F",
+    "color.heading.h4": "#00ACC1",
+    "color.link": "#1565C0",
+    "color.link.external": "#0277BD",
+    "color.link.tooltip.bg": "#0F2460",
+    "color.link.tooltip.text": "#F0F4FF",
+    "color.table.border": "#B0C4E8",
+    "color.table.header.bg": "#D8E4F8",
+    "color.table.row.alt.bg": "#EBF0FF",
+    "color.image.fallback.border": "#B0C4E8",
+    "color.image.caption.text": "#6B7A9F",
+    "color.sidebar.bg": "#E8EEF8",
+    "color.sidebar.border": "#D0DCEF",
+    "color.sidebar.link.active": "#00838F"
+  },
+  "dark": {
+    "color.bg": "#0D1B2A",
+    "color.text": "#B8CCE4",
+    "color.text.muted": "#6B859E",
+    "color.code.bg": "#122840",
+    "color.quote.bar": "#4FC3F7",
+    "color.heading.h1": "#90CAF9",
+    "color.heading.h2": "#4FC3F7",
+    "color.heading.h3": "#26C6DA",
+    "color.heading.h4": "#80CBC4",
+    "color.link": "#64B5F6",
+    "color.link.external": "#4FC3F7",
+    "color.link.tooltip.bg": "#0D1B2A",
+    "color.link.tooltip.text": "#B8CCE4",
+    "color.table.border": "#1E3A52",
+    "color.table.header.bg": "#122840",
+    "color.table.row.alt.bg": "#0D1B2A",
+    "color.image.fallback.border": "#1E3A52",
+    "color.image.caption.text": "#6B859E",
+    "color.sidebar.bg": "#0D1B2A",
+    "color.sidebar.border": "#122840",
+    "color.sidebar.link.active": "#26C6DA"
+  },
+  "shiki": {
+    "light": "github-light",
+    "dark": "nord"
+  }
+}

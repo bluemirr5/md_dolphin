@@ -1,0 +1,101 @@
+{
+  "menu": {
+    "app": {
+      "about": "md_dolphin 정보",
+      "services": "서비스",
+      "hide": "md_dolphin 가리기",
+      "hideOthers": "다른 항목 가리기",
+      "unhide": "모두 보기",
+      "quit": "md_dolphin 종료"
+    },
+    "file": {
+      "open": "파일 열기...",
+      "print": "인쇄...",
+      "saveAsPdf": "PDF로 저장...",
+      "close": "닫기",
+      "label": "파일"
+    },
+    "edit": {
+      "label": "편집"
+    },
+    "view": {
+      "label": "보기",
+      "zoomIn": "확대",
+      "zoomOut": "축소",
+      "actualSize": "실제 크기",
+      "toggleSidebar": "사이드바 전환",
+      "focusArticle": "문서 포커스",
+      "toggleWide": "와이드 모드 전환",
+      "theme": "테마",
+      "revealThemesFolder": "테마 폴더 열기"
+    },
+    "window": {
+      "label": "윈도우"
+    },
+    "help": {
+      "label": "도움말"
+    }
+  },
+  "errors": {
+    "permission": {
+      "message": "파일에 접근할 수 없습니다. 권한을 확인해주세요.",
+      "ariaLabel": "권한 오류"
+    },
+    "encoding": {
+      "message": "파일 인코딩을 인식할 수 없습니다.",
+      "ariaLabel": "인코딩 오류"
+    },
+    "notMarkdown": {
+      "message": "마크다운 파일을 읽을 수 없습니다. 파일이 손상되었을 수 있습니다.",
+      "ariaLabel": "마크다운 오류"
+    },
+    "tooLarge": {
+      "message": "파일이 너무 큽니다 (10MB 초과). 계속 열기를 선택할 수 있습니다.",
+      "ariaLabel": "파일 크기 오류"
+    },
+    "empty": {
+      "message": "파일이 비어 있습니다.",
+      "ariaLabel": "빈 파일 오류"
+    },
+    "io": {
+      "message": "파일을 읽는 중 오류가 발생했습니다.",
+      "ariaLabel": "파일 읽기 오류"
+    },
+    "retry": "다시 시도",
+    "cancel": "취소"
+  },
+  "dialog": {
+    "openFile": "파일 열기",
+    "savePdf": "PDF 저장",
+    "largeFile": {
+      "title": "큰 파일",
+      "message": "이 파일은 10MB를 초과합니다. 계속하시겠습니까?",
+      "continue": "계속",
+      "cancel": "취소"
+    }
+  },
+  "a11y": {
+    "sidebar": {
+      "outline": "문서 목차",
+      "nav": "목차 탐색"
+    },
+    "article": {
+      "main": "문서 본문"
+    },
+    "outline": {
+      "empty": "목차가 없습니다."
+    }
+  },
+  "welcome": {
+    "ariaLabel": "환영 화면",
+    "tagline": "macOS Markdown 뷰어",
+    "dropzone": {
+      "primary": ".md 파일을 드롭하거나 클릭하세요",
+      "shortcut": "또는 ⌘O로 열기"
+    },
+    "recent": {
+      "title": "최근 파일",
+      "removeAria": "최근 목록에서 제거"
+    }
+  }
+}

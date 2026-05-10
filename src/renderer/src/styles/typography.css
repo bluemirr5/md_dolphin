@@ -1,0 +1,148 @@
+/* typography.css — 본문 타이포그래피 (마스터 플랜 5.1)
+ * 설계 제약: CSS 모듈 미사용, 글로벌 .md-content 셀렉터
+ * 사이클 9 인쇄 미디어 쿼리(@media print)·가상화 스타일은 사이클 9에서 추가
+ * 사이클 10: --font-scale 동적 스케일 변수 단일 진입점 (P10-4)
+ *   html { font-size: calc(16px * var(--font-scale, 1)) }
+ *   본문은 rem 기반 → 줌 IPC와 1:1 비례 확대 */
+
+/* 동적 폰트 스케일 — zoom-bridge.ts가 --font-scale 갱신 */
+html {
+  font-size: calc(16px * var(--font-scale, 1));
+}
+
+.md-content {
+  /* 본문 레이아웃 — react-virtuoso scroller가 article 자체이므로 폭 100%.
+     react-virtuoso의 Viewport는 position:absolute이라 article의 padding을
+     덮어버린다. 따라서 중앙 정렬·좌우 여백은 .md-content__item에서 처리하고,
+     상/하단 여백은 Virtuoso Header/Footer(.md-content__spacer)로 대체한다.
+     article 자체는 padding 없이 full-width로 유지되어 스크롤바가 우측 끝에 위치한다. */
+  width: 100%;
+  box-sizing: border-box;
+
+  /* 기본 타이포그래피 — rem 기반 (--font-scale과 연동) */
+  font-family: -apple-system, 'SF Pro Text', system-ui, 'Apple SD Gothic Neo', Pretendard, sans-serif;
+  font-size: 1.0625rem; /* 17px @ 16px base */
+  line-height: 1.7;
+  color: var(--text);
+  background-color: var(--bg);
+
+  /* 한글 자간 */
+  letter-spacing: -0.01em;
+}
+
+/* 본문 블록 wrapper — max-width 680px 중앙 정렬 + 좁은 창에서는 24px 좌우 여백 */
+.md-content__item {
+  max-width: 680px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+  box-sizing: border-box;
+  /* 자식(h1~p 등)의 margin-top/bottom이 wrapper 밖으로 collapse되어
+     virtuoso ResizeObserver 측정에서 누락되는 것을 차단.
+     → totalHeight 추정 정확도 ↑, 휠 스크롤 중 보정 점프 완화 */
+  display: flow-root;
+}
+
+/* 와이드 모드 — .md-layout.is-wide 토글 시 본문 max-width 제약 해제.
+   ⌘3 또는 View 메뉴 "와이드 모드 전환"으로 토글. localStorage 영속화.
+   width: 100%까지 명시해 wrapper가 부모(article)의 전 폭을 차지하도록 보장.
+   좌우 padding은 32px로 살짝 키워 가장자리 텍스트가 스크롤바와 붙는 인상 완화. */
+.md-layout.is-wide .md-content__item {
+  max-width: none;
+  width: 100%;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+/* Virtuoso Header/Footer로 삽입되는 상/하단 여백 spacer.
+ * 상단은 타이틀 바(--titlebar-height) 만큼 추가로 띄워 첫 블록이 신호등에 가리지 않게 한다. */
+.md-content__spacer {
+  height: 32px;
+}
+.md-content__spacer--top {
+  height: calc(var(--titlebar-height, 38px) + 24px);
+}
+
+/* 헤딩 크기 — rem 기반 (--font-scale과 연동) */
+/* 사이클 12: h1~h4 color를 --heading-h{1..4} 변수로 명시 (테마 팩 지원) */
+.md-content h1 {
+  font-size: 2rem; /* 32px @ 16px base */
+  line-height: 1.25;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  color: var(--heading-h1);
+}
+
+.md-content h2 {
+  font-size: 1.625rem; /* 26px @ 16px base */
+  line-height: 1.3;
+  margin-top: 1.75em;
+  margin-bottom: 0.5em;
+  color: var(--heading-h2);
+}
+
+.md-content h3 {
+  font-size: 1.25rem; /* 20px @ 16px base */
+  line-height: 1.4;
+  margin-top: 1.5em;
+  margin-bottom: 0.4em;
+  color: var(--heading-h3);
+}
+
+.md-content h4 {
+  font-size: 1.125rem; /* 18px @ 16px base */
+  line-height: 1.4;
+  margin-top: 1.25em;
+  margin-bottom: 0.4em;
+  color: var(--heading-h4);
+}
+
+/* 단락 간격 */
+.md-content p {
+  margin-top: 0;
+  margin-bottom: 1.2em;
+}
+
+/* 링크 색상 — 사이클 12: --link / --link-external 변수 사용 (테마 팩 지원) */
+.md-content .md-link {
+  color: var(--link);
+  text-decoration: underline;
+}
+
+.md-content .md-link--external {
+  color: var(--link-external);
+}
+
+/* 인용 블록 */
+.md-content blockquote {
+  margin: 1.2em 0;
+  padding: 0.5em 1em;
+  border-left: 4px solid var(--quote-bar);
+  color: var(--text);
+  /* opacity 대신 border 색상으로만 시각적 구분 — opacity는 border도 희석시킴 */
+}
+
+/* 코드 블록 */
+.md-content pre {
+  background-color: var(--code-bg);
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-bottom: 1.2em;
+  font-size: 0.875rem; /* 14px @ 16px base */
+  line-height: 1.6;
+}
+
+.md-content code {
+  background-color: var(--code-bg);
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.md-content pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}

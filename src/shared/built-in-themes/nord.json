@@ -1,0 +1,53 @@
+{
+  "name": "Nord",
+  "light": {
+    "color.bg": "#ECEFF4",
+    "color.text": "#2E3440",
+    "color.text.muted": "#4C566A",
+    "color.code.bg": "#E5E9F0",
+    "color.quote.bar": "#81A1C1",
+    "color.heading.h1": "#2E3440",
+    "color.heading.h2": "#3B4252",
+    "color.heading.h3": "#434C5E",
+    "color.heading.h4": "#4C566A",
+    "color.link": "#5E81AC",
+    "color.link.external": "#5E81AC",
+    "color.link.tooltip.bg": "#3B4252",
+    "color.link.tooltip.text": "#ECEFF4",
+    "color.table.border": "#81A1C1",
+    "color.table.header.bg": "#E5E9F0",
+    "color.table.row.alt.bg": "#ECEFF4",
+    "color.image.fallback.border": "#81A1C1",
+    "color.image.caption.text": "#4C566A",
+    "color.sidebar.bg": "#E5E9F0",
+    "color.sidebar.border": "#D8DEE9",
+    "color.sidebar.link.active": "#81A1C1"
+  },
+  "dark": {
+    "color.bg": "#2E3440",
+    "color.text": "#ECEFF4",
+    "color.text.muted": "#D8DEE9",
+    "color.code.bg": "#3B4252",
+    "color.quote.bar": "#81A1C1",
+    "color.heading.h1": "#ECEFF4",
+    "color.heading.h2": "#E5E9F0",
+    "color.heading.h3": "#D8DEE9",
+    "color.heading.h4": "#D8DEE9",
+    "color.link": "#88C0D0",
+    "color.link.external": "#88C0D0",
+    "color.link.tooltip.bg": "#3B4252",
+    "color.link.tooltip.text": "#ECEFF4",
+    "color.table.border": "#4C566A",
+    "color.table.header.bg": "#3B4252",
+    "color.table.row.alt.bg": "#2E3440",
+    "color.image.fallback.border": "#4C566A",
+    "color.image.caption.text": "#D8DEE9",
+    "color.sidebar.bg": "#2E3440",
+    "color.sidebar.border": "#3B4252",
+    "color.sidebar.link.active": "#81A1C1"
+  },
+  "shiki": {
+    "light": "github-light",
+    "dark": "nord"
+  }
+}

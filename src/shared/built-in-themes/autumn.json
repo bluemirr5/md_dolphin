@@ -1,0 +1,53 @@
+{
+  "name": "Autumn",
+  "light": {
+    "color.bg": "#FFF9F2",
+    "color.text": "#2D1810",
+    "color.text.muted": "#8B6E5A",
+    "color.code.bg": "#F5E6D0",
+    "color.quote.bar": "#C44A00",
+    "color.heading.h1": "#7B1900",
+    "color.heading.h2": "#C44A00",
+    "color.heading.h3": "#B58800",
+    "color.heading.h4": "#4A7C59",
+    "color.link": "#C44A00",
+    "color.link.external": "#A03500",
+    "color.link.tooltip.bg": "#2D1810",
+    "color.link.tooltip.text": "#FFF9F2",
+    "color.table.border": "#D4B898",
+    "color.table.header.bg": "#F0D9C0",
+    "color.table.row.alt.bg": "#FFF9F2",
+    "color.image.fallback.border": "#D4B898",
+    "color.image.caption.text": "#8B6E5A",
+    "color.sidebar.bg": "#FFF9F2",
+    "color.sidebar.border": "#F0D9C0",
+    "color.sidebar.link.active": "#C44A00"
+  },
+  "dark": {
+    "color.bg": "#1C1208",
+    "color.text": "#E8D5B7",
+    "color.text.muted": "#A08870",
+    "color.code.bg": "#281A0C",
+    "color.quote.bar": "#E07B30",
+    "color.heading.h1": "#FF8A65",
+    "color.heading.h2": "#FFB74D",
+    "color.heading.h3": "#FFD54F",
+    "color.heading.h4": "#A5D6A7",
+    "color.link": "#FFB74D",
+    "color.link.external": "#FF8A65",
+    "color.link.tooltip.bg": "#1C1208",
+    "color.link.tooltip.text": "#E8D5B7",
+    "color.table.border": "#3D2510",
+    "color.table.header.bg": "#281A0C",
+    "color.table.row.alt.bg": "#1C1208",
+    "color.image.fallback.border": "#3D2510",
+    "color.image.caption.text": "#A08870",
+    "color.sidebar.bg": "#1C1208",
+    "color.sidebar.border": "#281A0C",
+    "color.sidebar.link.active": "#FFB74D"
+  },
+  "shiki": {
+    "light": "github-light",
+    "dark": "github-dark"
+  }
+}

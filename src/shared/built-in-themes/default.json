@@ -1,0 +1,53 @@
+{
+  "name": "Default",
+  "light": {
+    "color.bg": "#FAFAF7",
+    "color.text": "#1A1A1A",
+    "color.text.muted": "#6B7280",
+    "color.code.bg": "#F0EDE6",
+    "color.quote.bar": "#C0B090",
+    "color.heading.h1": "#1A1A1A",
+    "color.heading.h2": "#1A1A1A",
+    "color.heading.h3": "#1A1A1A",
+    "color.heading.h4": "#1A1A1A",
+    "color.link": "#0A66C2",
+    "color.link.external": "#0A66C2",
+    "color.link.tooltip.bg": "#333333",
+    "color.link.tooltip.text": "#FFFFFF",
+    "color.table.border": "#D1D1D6",
+    "color.table.header.bg": "#F0EDE6",
+    "color.table.row.alt.bg": "#FAFAF7",
+    "color.image.fallback.border": "#D1D1D6",
+    "color.image.caption.text": "#6B7280",
+    "color.sidebar.bg": "#FAFAF7",
+    "color.sidebar.border": "#F0EDE6",
+    "color.sidebar.link.active": "#C0B090"
+  },
+  "dark": {
+    "color.bg": "#1C1C1E",
+    "color.text": "#E5E5E7",
+    "color.text.muted": "#9CA3AF",
+    "color.code.bg": "#2C2C2E",
+    "color.quote.bar": "#8A7A60",
+    "color.heading.h1": "#E5E5E7",
+    "color.heading.h2": "#E5E5E7",
+    "color.heading.h3": "#E5E5E7",
+    "color.heading.h4": "#E5E5E7",
+    "color.link": "#5BA8FF",
+    "color.link.external": "#5BA8FF",
+    "color.link.tooltip.bg": "#1C1C1E",
+    "color.link.tooltip.text": "#E5E5E7",
+    "color.table.border": "#3A3A3C",
+    "color.table.header.bg": "#2C2C2E",
+    "color.table.row.alt.bg": "#1C1C1E",
+    "color.image.fallback.border": "#3A3A3C",
+    "color.image.caption.text": "#9CA3AF",
+    "color.sidebar.bg": "#1C1C1E",
+    "color.sidebar.border": "#2C2C2E",
+    "color.sidebar.link.active": "#8A7A60"
+  },
+  "shiki": {
+    "light": "github-light",
+    "dark": "github-dark"
+  }
+}

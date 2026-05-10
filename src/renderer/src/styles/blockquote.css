@@ -1,0 +1,25 @@
+/* blockquote.css — 인용문 스타일 (사이클 7)
+ * 좌측 accent bar(4px, --quote-bar), 들여쓰기, 톤 다운 텍스트
+ * 중첩: .md-blockquote .md-blockquote 선택자로 들여쓰기 누적
+ * 사이클 4 토큰 동결: --accent 미정의 → --quote-bar 사용 (P7-12)
+ */
+
+.md-blockquote {
+  margin: 0.75em 0;
+  padding: 0.5em 1em;
+  border-left: 4px solid var(--quote-bar, #6e6e73);
+  border-radius: 2px;
+  /* 사이클 12: color-mix → --text-muted 변수 (테마 팩 지원) */
+  color: var(--text-muted);
+  background-color: transparent;
+}
+
+/* 중첩 blockquote — 들여쓰기 누적 */
+.md-blockquote .md-blockquote {
+  margin-left: 0.5em;
+}
+
+/* blockquote 내부 p 태그 마진 조정 */
+.md-blockquote p {
+  margin: 0.25em 0;
+}

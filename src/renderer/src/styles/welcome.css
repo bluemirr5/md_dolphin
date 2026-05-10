@@ -1,0 +1,188 @@
+/* welcome.css — WelcomeScreen 첫 화면 스타일
+ * 사이드바 숨김 + main 가득 채움 + 중앙 정렬
+ * 색상은 기존 CSS 변수만 사용 (--bg, --text, --code-bg, --quote-bar) */
+
+.md-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  padding: var(--titlebar-height, 38px) 32px 48px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  font-family: -apple-system, 'SF Pro Text', system-ui, 'Apple SD Gothic Neo', Pretendard, sans-serif;
+  color: var(--text);
+}
+
+/* 히어로 — 브랜드 뱃지 + 태그라인 세로 정렬 */
+.md-welcome__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.md-welcome__brand {
+  /* 이미지 자체가 라운드 코너 + 글로우를 포함하므로 추가 스타일 없이 표시 */
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.md-welcome__tagline {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.6;
+}
+
+/* 드롭존 버튼 — 대시 보더, hover 시 강조 */
+.md-welcome__dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 320px;
+  padding: 28px 56px;
+  border: 2px dashed var(--code-bg);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.md-welcome__dropzone:hover {
+  border-color: var(--quote-bar);
+  background-color: rgba(127, 127, 127, 0.06);
+}
+
+.md-welcome__dropzone:active {
+  transform: scale(0.99);
+}
+
+.md-welcome__dropzone:focus-visible {
+  outline: 2px solid var(--quote-bar);
+  outline-offset: 3px;
+}
+
+.md-welcome__dropzone-primary {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.md-welcome__dropzone-shortcut {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* 최근 파일 — 드롭존 아래 카드 형태 목록 */
+.md-welcome__recent {
+  width: 100%;
+  max-width: 480px;
+}
+
+.md-welcome__recent-title {
+  margin: 0 0 8px;
+  padding: 0 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.md-welcome__recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.md-welcome__recent-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 8px;
+  transition: background-color 0.12s ease;
+}
+
+.md-welcome__recent-item:hover,
+.md-welcome__recent-item:focus-within {
+  background-color: rgba(127, 127, 127, 0.08);
+}
+
+.md-welcome__recent-link {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  font-family: inherit;
+  text-align: left;
+  border-radius: 8px;
+}
+
+.md-welcome__recent-link:focus-visible {
+  outline: 2px solid var(--quote-bar);
+  outline-offset: -2px;
+}
+
+.md-welcome__recent-name {
+  width: 100%;
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.md-welcome__recent-dir {
+  width: 100%;
+  margin-top: 2px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 제거(×) 버튼 — 호버 시에만 노출 */
+.md-welcome__recent-remove {
+  margin-right: 4px;
+  padding: 2px 8px;
+  background: none;
+  border: none;
+  color: var(--text);
+  opacity: 0;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 4px;
+  transition:
+    opacity 0.12s ease,
+    background-color 0.12s ease;
+}
+
+.md-welcome__recent-item:hover .md-welcome__recent-remove,
+.md-welcome__recent-remove:focus-visible {
+  opacity: 0.55;
+}
+
+.md-welcome__recent-remove:hover,
+.md-welcome__recent-remove:focus-visible {
+  opacity: 1;
+  background-color: rgba(127, 127, 127, 0.18);
+}

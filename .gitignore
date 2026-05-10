@@ -1,0 +1,16 @@
+node_modules/
+out/
+dist/
+/release/*
+!/release/release-notes.template.md
+*.log
+.DS_Store
+.vscode/
+.idea/
+coverage/
+
+# internal — not for public repo
+docs/
+.claude/
+CLAUDE.md
+homebrew-tap/

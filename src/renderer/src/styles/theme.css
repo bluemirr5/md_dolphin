@@ -1,0 +1,89 @@
+/* theme.css — CSS 변수 토큰 (마스터 플랜 5.2)
+ * 사이클 4 P4-3: 4변수 동결 (--bg, --text, --quote-bar, --code-bg)
+ * 사이클 12 P12-1: 변수 동결 해제 — 사용자 테마 팩이 인라인 스타일로 덮음.
+ *   총 21변수 (동결 4 + 신규 17). 컴포넌트 CSS는 항상 var(--name) 단일 셀렉터.
+ *   인라인 setProperty specificity가 :root[data-theme=...] 보다 우선이므로
+ *   팩 미적용 시 fallback CSS가 자동 활성됨 (advisor 결정).
+ * 진입점: document.documentElement.dataset.theme (단일화, P4-1)
+ * 컴포넌트 CSS는 분기 무지 (color: var(--text) 만 작성) */
+
+/* fallback: data-theme 미설정 시(ThemeProvider 초기화 전) light 값 사용 — FOUC 방지 */
+:root {
+  --bg: #FAFAF7;
+  --text: #1A1A1A;
+  --text-muted: #6B7280;
+  --quote-bar: #C0B090;
+  --code-bg: #F0EDE6;
+  --heading-h1: #1A1A1A;
+  --heading-h2: #1A1A1A;
+  --heading-h3: #1A1A1A;
+  --heading-h4: #1A1A1A;
+  --link: #0A66C2;
+  --link-external: #0A66C2;
+  --link-tooltip-bg: #333333;
+  --link-tooltip-text: #FFFFFF;
+  --table-border: #D1D1D6;
+  --table-header-bg: #F0EDE6;
+  --table-row-alt-bg: #FAFAF7;
+  --image-fallback-border: #D1D1D6;
+  --image-caption-text: #6B7280;
+  --sidebar-bg: #FAFAF7;
+  --sidebar-border: #F0EDE6;
+  --sidebar-link-active: #C0B090;
+}
+
+:root[data-theme='light'] {
+  --bg: #FAFAF7;
+  --text: #1A1A1A;
+  --text-muted: #6B7280;
+  --quote-bar: #C0B090;
+  --code-bg: #F0EDE6;
+  --heading-h1: #1A1A1A;
+  --heading-h2: #1A1A1A;
+  --heading-h3: #1A1A1A;
+  --heading-h4: #1A1A1A;
+  --link: #0A66C2;
+  --link-external: #0A66C2;
+  --link-tooltip-bg: #333333;
+  --link-tooltip-text: #FFFFFF;
+  --table-border: #D1D1D6;
+  --table-header-bg: #F0EDE6;
+  --table-row-alt-bg: #FAFAF7;
+  --image-fallback-border: #D1D1D6;
+  --image-caption-text: #6B7280;
+  --sidebar-bg: #FAFAF7;
+  --sidebar-border: #F0EDE6;
+  --sidebar-link-active: #C0B090;
+}
+
+:root[data-theme='dark'] {
+  --bg: #1C1C1E;
+  --text: #E5E5E7;
+  --text-muted: #9CA3AF;
+  --quote-bar: #8A7A60;
+  --code-bg: #2C2C2E;
+  --heading-h1: #E5E5E7;
+  --heading-h2: #E5E5E7;
+  --heading-h3: #E5E5E7;
+  --heading-h4: #E5E5E7;
+  --link: #5BA8FF;
+  --link-external: #5BA8FF;
+  --link-tooltip-bg: #1C1C1E;
+  --link-tooltip-text: #E5E5E7;
+  --table-border: #3A3A3C;
+  --table-header-bg: #2C2C2E;
+  --table-row-alt-bg: #1C1C1E;
+  --image-fallback-border: #3A3A3C;
+  --image-caption-text: #9CA3AF;
+  --sidebar-bg: #1C1C1E;
+  --sidebar-border: #2C2C2E;
+  --sidebar-link-active: #8A7A60;
+}
+
+/* 윈도우 전체 배경·텍스트를 테마 변수에 종속시킨다 — .md-content 외부 영역(여백) 포함 */
+html,
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+}

@@ -1,0 +1,78 @@
+/* codeblock.css — 코드 블록 카드 스타일 (사이클 6)
+ * 설계 제약: CSS 변수 --bg/--text/--code-bg만 재사용 (사이클 4 토큰, 신규 변수 금지)
+ * shiki dual theme: --shiki-light / --shiki-dark 인라인 변수 — shiki가 직접 주입 */
+
+.codeblock {
+  position: relative;
+  background: var(--code-bg);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 1.2em 0;
+  font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 14px;
+  overflow-x: auto;
+}
+
+/* shiki가 출력하는 <pre> — 마진/패딩 초기화 (codeblock wrapper가 담당) */
+.codeblock pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  overflow-x: auto;
+}
+
+/* plain fallback <pre><code> */
+.codeblock > pre {
+  margin: 0;
+}
+
+/* 언어 라벨 — 우상단 absolute */
+.codeblock__lang {
+  position: absolute;
+  top: 8px;
+  right: 60px;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--text);
+  opacity: 0.5;
+  user-select: none;
+  pointer-events: none;
+  text-transform: lowercase;
+}
+
+/* 복사 버튼 — hover/focus 시 노출, 기본 투명 */
+.codeblock__copy {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--text);
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* hover 또는 focus-visible 시 복사 버튼 노출 */
+.codeblock:hover .codeblock__copy,
+.codeblock__copy:focus-visible {
+  opacity: 0.7;
+}
+
+.codeblock__copy:hover {
+  opacity: 1;
+}
+
+/* shiki dual theme: 라이트 색상은 shiki가 inline style로 직접 주입
+ * 다크는 --shiki-dark 인라인 변수만 별도 주입 → ThemeContext 토글 시 변수로 덮어쓴다 */
+[data-theme='dark'] .shiki,
+[data-theme='dark'] .shiki span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
