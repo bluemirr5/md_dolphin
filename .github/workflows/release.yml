@@ -48,7 +48,8 @@ jobs:
       - name: Build DMG (start)
         run: |
           echo "::notice::dist 시작 $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
-          pnpm dist -- --publish=never
+          pnpm electron-vite build
+          pnpm electron-builder --mac dmg --universal --publish=never
           echo "::notice::dist 종료 $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
       - run: pnpm dist:checksum
