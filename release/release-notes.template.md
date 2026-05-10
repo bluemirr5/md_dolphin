@@ -2,9 +2,7 @@
 
 ### 변경 요약
 
-- 업데이트 알림 배너 추가 — 새 버전 감지 시 `brew upgrade --cask md-dolphin` 명령어를 클립보드에 복사할 수 있는 배너 표시
-- 자동 업데이트 확인 — 앱 시작 5초 후 GitHub Releases에서 최신 버전 조회 (자동 다운로드 없음)
-- Homebrew cask 자동 업데이트 — 릴리스 태그 push 시 GitHub Actions가 tap 레포의 version/sha256 자동 갱신
+- 앱 실행 크래시 수정 — `electron-updater` 모듈 로딩 방식을 동적 import로 변경하여 시작 즉시 종료되던 문제 해결
 
 ### 설치 방법
 

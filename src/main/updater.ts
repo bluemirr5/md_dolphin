@@ -1,11 +1,18 @@
-import { autoUpdater } from 'electron-updater';
 import { ipcMain, BrowserWindow, shell } from 'electron';
 import { API_UPDATE_AVAILABLE, API_UPDATE_OPEN_RELEASES } from '@shared/ipc-channels';
 
 const RELEASES_URL = 'https://github.com/bluemirr5/md_dolphin/releases';
 const CHECK_DELAY_MS = 5_000;
 
-export function registerUpdater(): () => void {
+export async function registerUpdater(): Promise<() => void> {
+  // IPC handler registered first (no autoUpdater dependency)
+  ipcMain.handle(API_UPDATE_OPEN_RELEASES, async () => {
+    await shell.openExternal(RELEASES_URL);
+  });
+
+  // electron-updater is CJS; dynamic import avoids ESM named-import static analysis
+  // issues when this ESM-compiled main process loads it via the asar module resolver.
+  const { autoUpdater } = await import('electron-updater');
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = false;
 
@@ -22,10 +29,6 @@ export function registerUpdater(): () => void {
   setTimeout(() => {
     void autoUpdater.checkForUpdates();
   }, CHECK_DELAY_MS);
-
-  ipcMain.handle(API_UPDATE_OPEN_RELEASES, async () => {
-    await shell.openExternal(RELEASES_URL);
-  });
 
   return () => {
     ipcMain.removeHandler(API_UPDATE_OPEN_RELEASES);

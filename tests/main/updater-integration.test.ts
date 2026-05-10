@@ -14,14 +14,14 @@ describe('isPackaged 가드 — AC4', () => {
   it('isPackaged=true 시 registerUpdater 호출', () => {
     vi.clearAllMocks();
     const isPackaged = true;
-    if (isPackaged) registerUpdater();
+    if (isPackaged) void registerUpdater();
     expect(reg).toHaveBeenCalledOnce();
   });
 
   it('isPackaged=false 시 registerUpdater 미호출', () => {
     vi.clearAllMocks();
     const isPackaged = false;
-    if (isPackaged) registerUpdater();
+    if (isPackaged) void registerUpdater();
     expect(reg).not.toHaveBeenCalled();
   });
 });

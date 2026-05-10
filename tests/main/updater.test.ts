@@ -65,44 +65,44 @@ afterEach(() => {
 });
 
 describe('registerUpdater — 설정', () => {
-  it('autoDownload = false로 설정', () => {
-    registerUpdater();
+  it('autoDownload = false로 설정', async () => {
+    await registerUpdater();
     expect(au.autoDownload).toBe(false);
   });
 
-  it('autoInstallOnAppQuit = false로 설정', () => {
-    registerUpdater();
+  it('autoInstallOnAppQuit = false로 설정', async () => {
+    await registerUpdater();
     expect(au.autoInstallOnAppQuit).toBe(false);
   });
 });
 
 describe('registerUpdater — 5초 딜레이', () => {
-  it('즉시 checkForUpdates 미호출', () => {
-    registerUpdater();
+  it('즉시 checkForUpdates 미호출', async () => {
+    await registerUpdater();
     expect(au.checkForUpdates).not.toHaveBeenCalled();
   });
 
-  it('5초 경과 후 checkForUpdates 호출', () => {
-    registerUpdater();
+  it('5초 경과 후 checkForUpdates 호출', async () => {
+    await registerUpdater();
     vi.advanceTimersByTime(5000);
     expect(au.checkForUpdates).toHaveBeenCalledOnce();
   });
 
-  it('4.9초 경과 시 checkForUpdates 미호출', () => {
-    registerUpdater();
+  it('4.9초 경과 시 checkForUpdates 미호출', async () => {
+    await registerUpdater();
     vi.advanceTimersByTime(4999);
     expect(au.checkForUpdates).not.toHaveBeenCalled();
   });
 });
 
 describe('registerUpdater — update-available 이벤트', () => {
-  it('update-available 리스너 등록', () => {
-    registerUpdater();
+  it('update-available 리스너 등록', async () => {
+    await registerUpdater();
     expect(getAutoUpdaterHandler('update-available')).toBeDefined();
   });
 
   it('update-available 발화 → 모든 윈도우에 api:updateAvailable + 버전 전송', async () => {
-    registerUpdater();
+    await registerUpdater();
     const handler = getAutoUpdaterHandler('update-available');
     handler?.({ version: '1.2.3' });
 
@@ -112,8 +112,8 @@ describe('registerUpdater — update-available 이벤트', () => {
 });
 
 describe('registerUpdater — error 핸들링 (AC5)', () => {
-  it('error 이벤트 발화 시 앱 크래시 없음 (console.warn)', () => {
-    registerUpdater();
+  it('error 이벤트 발화 시 앱 크래시 없음 (console.warn)', async () => {
+    await registerUpdater();
     const handler = getAutoUpdaterHandler('error');
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     expect(() => handler?.({ message: 'network error' })).not.toThrow();
@@ -123,12 +123,12 @@ describe('registerUpdater — error 핸들링 (AC5)', () => {
 
 describe('registerUpdater — api:updateOpenReleases 핸들러', () => {
   it('api:updateOpenReleases IPC 핸들러 등록', () => {
-    registerUpdater();
+    void registerUpdater(); // IPC handler registers before first await
     expect(getIpcHandler('api:updateOpenReleases')).toBeDefined();
   });
 
   it('api:updateOpenReleases 호출 → shell.openExternal(releases URL)', async () => {
-    registerUpdater();
+    await registerUpdater();
     const handler = getIpcHandler('api:updateOpenReleases');
     await handler?.(null);
     expect(sh.openExternal).toHaveBeenCalledWith(
@@ -138,8 +138,8 @@ describe('registerUpdater — api:updateOpenReleases 핸들러', () => {
 });
 
 describe('registerUpdater — dispose', () => {
-  it('dispose 호출 시 ipcMain.removeHandler 실행', () => {
-    const dispose = registerUpdater();
+  it('dispose 호출 시 ipcMain.removeHandler 실행', async () => {
+    const dispose = await registerUpdater();
     dispose();
     expect(ipc.removeHandler).toHaveBeenCalledWith('api:updateOpenReleases');
   });

@@ -136,7 +136,9 @@ void app.whenReady().then(() => {
   // isPackaged 가드 — dev 모드에서 GitHub API 불필요 호출 방지 (설계 제약 AC4)
   let disposeUpdater: (() => void) | undefined;
   if (app.isPackaged) {
-    disposeUpdater = registerUpdater();
+    void registerUpdater().then((dispose) => {
+      disposeUpdater = dispose;
+    });
   }
 
   app.once('before-quit', () => {
