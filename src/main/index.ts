@@ -148,7 +148,7 @@ void app.whenReady().then(() => {
   });
 
   // 활성 테마 id는 renderer localStorage 단일 진실원 — main은 메뉴 radio 갱신용으로만 사용
-  let activePackId = 'builtin:default';
+  const activePackId = 'builtin:default';
 
   // 메뉴 설치 — fileService + windowManager + themePackService 주입 (fire-and-forget)
   void installMenu(fileService, windowManager, themePackService, () => activePackId);

@@ -59,7 +59,7 @@ export function createThemePackService(): ThemePackService {
   async function loadUserPacks(): Promise<ThemePack[]> {
     let entries: string[];
     try {
-      entries = (await fs.readdir(themesDir)) as string[];
+      entries = await fs.readdir(themesDir);
     } catch {
       // 디렉토리 없음 — 사용자 팩 0건 (오류 아님)
       return [];
@@ -87,7 +87,7 @@ export function createThemePackService(): ThemePackService {
       // JSON 읽기 + 파싱
       let rawJson: unknown;
       try {
-        const content = await fs.readFile(filePath, 'utf-8') as string;
+        const content = await fs.readFile(filePath, 'utf-8');
         rawJson = JSON.parse(content) as unknown;
       } catch (err) {
         console.warn(`[theme-pack] JSON 파싱 실패 (skip): ${filePath}`, err);

@@ -1,11 +1,11 @@
 // R2 TDD — theme-pack-service.ts
 // 빌트인 3종 반환, user JSON 추가, symlink 거부, JSON 깨짐 skip, builtin id prefix
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { join } from 'node:path';
+import type * as NodeFsNS from 'node:fs';
 
 // fs.promises + electron.app 모킹
-vi.mock('node:fs', () => {
-  const actual = vi.importActual<typeof import('node:fs')>('node:fs');
+vi.mock('node:fs', async () => {
+  const actual = await vi.importActual<typeof NodeFsNS>('node:fs');
   return {
     ...actual,
     promises: {
@@ -197,7 +197,8 @@ describe('ThemePackService', () => {
     it('ensureThemesDir 후 showItemInFolder를 호출해야 한다', async () => {
       const service = createThemePackService();
       await service.revealFolder();
-      expect(electronShell.showItemInFolder).toHaveBeenCalledWith(themesDir);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(vi.mocked(electronShell).showItemInFolder).toHaveBeenCalledWith(themesDir);
     });
   });
 });

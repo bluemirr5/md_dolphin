@@ -21,7 +21,7 @@ vi.mock('shiki', () => {
 import { createHighlighter } from 'shiki';
 
 describe('setShikiThemes', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
     // createHighlighter mock 재설정
@@ -71,7 +71,7 @@ describe('setShikiThemes', () => {
 
     // loadTheme이 reject을 던지도록 모킹
     vi.spyOn(mockHighlighter, 'loadTheme').mockRejectedValueOnce(new Error('Theme not found: fake-theme'));
-    const codeToHtmlSpy = vi.spyOn(mockHighlighter, 'codeToHtml');
+    vi.spyOn(mockHighlighter, 'codeToHtml');
 
     const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 

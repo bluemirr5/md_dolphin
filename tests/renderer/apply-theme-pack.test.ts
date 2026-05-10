@@ -94,7 +94,7 @@ describe('applyThemePack', () => {
     const { applyThemePack } = await import('../../src/renderer/src/theme/applyThemePack');
     applyThemePack(TEST_PACK, 'light');
     const calledVars = setPropertySpy.mock.calls.map((call) => call[0]);
-    for (const key of TOKEN_KEYS) {
+    for (const _key of TOKEN_KEYS) {
       // TOKEN_TO_CSS_VAR으로 매핑된 변수명이 호출됐는지 확인
       // 최소 1회 이상 호출됐는지 확인
       expect(calledVars.length).toBe(21);
@@ -125,8 +125,8 @@ function toBuiltinPack(id: string, json: typeof defaultJson): ThemePack {
     id: `builtin:${id}`,
     name: json.name,
     source: 'builtin',
-    light: json.light as ThemePack['light'],
-    dark: json.dark as ThemePack['dark'],
+    light: json.light,
+    dark: json.dark,
     shiki: json.shiki,
   };
 }

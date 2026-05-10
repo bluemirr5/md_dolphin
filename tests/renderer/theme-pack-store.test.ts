@@ -17,7 +17,7 @@ describe('theme-pack-store', () => {
   });
 
   it('초기 activeId는 localStorage 값 또는 builtin:default여야 한다', async () => {
-    const { useActivePackId } = await import('../../src/renderer/src/store/theme-pack-store');
+    const { useActivePackId: _useActivePackId } = await import('../../src/renderer/src/store/theme-pack-store');
     // zustand 스토어에서 직접 get
     const { themePackStore } = await import('../../src/renderer/src/store/theme-pack-store');
     expect(themePackStore.getState().activeId).toBe('builtin:default');

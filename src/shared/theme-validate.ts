@@ -143,18 +143,18 @@ export function validateThemePack(
   const lightRaw = rawObj['light'] as Record<string, unknown>;
   const darkRaw = rawObj['dark'] as Record<string, unknown>;
 
-  const validatedLight = validateTokens(lightRaw, fallbackLight, rawObj['name'] as string, 'light', warnings);
-  const validatedDark = validateTokens(darkRaw, fallbackDark, rawObj['name'] as string, 'dark', warnings);
+  const validatedLight = validateTokens(lightRaw, fallbackLight, rawObj['name'], 'light', warnings);
+  const validatedDark = validateTokens(darkRaw, fallbackDark, rawObj['name'], 'dark', warnings);
 
   const pack: ThemePack = {
     id: rawObj['id'] as string ?? '',
-    name: rawObj['name'] as string,
+    name: rawObj['name'],
     source: (rawObj['source'] as 'builtin' | 'user') ?? 'user',
     light: validatedLight,
     dark: validatedDark,
     shiki: {
-      light: shikiObj['light'] as string,
-      dark: shikiObj['dark'] as string,
+      light: shikiObj['light'],
+      dark: shikiObj['dark'],
     },
   };
 
