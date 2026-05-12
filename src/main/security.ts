@@ -9,13 +9,14 @@ export function enableSandboxBeforeReady(app: App): void {
 }
 
 // [SEC] 세션 수준 보안 정책 등록.
-// - setPermissionRequestHandler: 모든 권한 요청 거부
+// - setPermissionRequestHandler: clipboard-sanitized-write만 허용, 나머지 거부
 // - webRequest.onHeadersReceived: CSP 헤더 주입 (사이클 7에서 렌더러 자산 허용으로 강화 예정)
 // isDev=true 시 Vite HMR WebSocket(ws://localhost:*)을 connect-src에 추가.
 export function installSessionSecurity(session: Session, isDev: boolean): void {
-  // 마이크·카메라·위치 등 모든 권한 요청 거부
-  session.setPermissionRequestHandler((_webContents, _permission, callback) => {
-    callback(false);
+  // 마이크·카메라·위치 등 거부. 코드블록 복사 버튼이 사용하는 clipboard-sanitized-write만 허용
+  // (sanitized = 커스텀 MIME 제거된 텍스트만 클립보드에 기록 → XSS 페이로드 주입 불가)
+  session.setPermissionRequestHandler((_webContents, permission, callback) => {
+    callback(permission === 'clipboard-sanitized-write');
   });
 
   // 모든 응답에 CSP 헤더를 주입한다.

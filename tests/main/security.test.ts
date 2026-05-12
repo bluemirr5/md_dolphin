@@ -39,7 +39,7 @@ describe('AC11 — installSessionSecurity', () => {
     expect(mockSession.webRequest.onHeadersReceived).toHaveBeenCalledTimes(1);
   });
 
-  it('setPermissionRequestHandler 콜백이 항상 false를 반환한다', () => {
+  it('setPermissionRequestHandler 콜백이 clipboard-sanitized-write만 허용한다', () => {
     let capturedCallback: PermissionCallback | null = null;
     const mockSession = {
       setPermissionRequestHandler: vi.fn((cb: PermissionCallback) => {
@@ -52,9 +52,23 @@ describe('AC11 — installSessionSecurity', () => {
     installSessionSecurity(mockSession as never, false);
 
     expect(capturedCallback).not.toBeNull();
-    const grantCb = vi.fn();
-    (capturedCallback as PermissionCallback)(null, 'camera', grantCb);
-    expect(grantCb).toHaveBeenCalledWith(false);
+    const cb = capturedCallback as PermissionCallback;
+
+    const cameraCb = vi.fn();
+    cb(null, 'camera', cameraCb);
+    expect(cameraCb).toHaveBeenCalledWith(false);
+
+    const micCb = vi.fn();
+    cb(null, 'media', micCb);
+    expect(micCb).toHaveBeenCalledWith(false);
+
+    const clipReadCb = vi.fn();
+    cb(null, 'clipboard-read', clipReadCb);
+    expect(clipReadCb).toHaveBeenCalledWith(false);
+
+    const clipWriteCb = vi.fn();
+    cb(null, 'clipboard-sanitized-write', clipWriteCb);
+    expect(clipWriteCb).toHaveBeenCalledWith(true);
   });
 
   it('prod CSP에는 script-src가 포함되고 기존 헤더를 유지한다', () => {
