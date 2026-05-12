@@ -87,15 +87,15 @@ md_dolphin is currently unsigned (not enrolled in the Apple Developer Program). 
 **Option A — Terminal (fastest)**
 
 ```bash
-xattr -dr com.apple.quarantine /Applications/md_dolphin.app
+xattr -dr com.apple.quarantine "/Applications/MD Dolphin.app"
 ```
 
-Then double-click md_dolphin normally.
+Then double-click **MD Dolphin** normally.
 
 **Option B — Finder**
 
 1. Open **Finder** → **Applications**.
-2. Right-click (or Control-click) `md_dolphin.app`.
+2. Right-click (or Control-click) `MD Dolphin.app`.
 3. Select **Open** from the context menu.
 4. Click **Open** in the security dialog that appears.
 
