@@ -131,7 +131,7 @@ function AppInner(): JSX.Element {
       // stat 실패 시 readFile로 진행 (ENOENT 등은 readFile에서 재처리)
     }
 
-    const result = await window.api.readFile(filePath, undefined);
+    const result = await window.api.openFilePath(filePath);
     if (result.ok) {
       setFileError(null);
       setDocument(result.document);
@@ -230,7 +230,7 @@ function AppInner(): JSX.Element {
     if (!pendingLargeFile) return;
     const { filePath } = pendingLargeFile;
     setPendingLargeFile(null);
-    const result = await window.api.readFile(filePath, undefined);
+    const result = await window.api.openFilePath(filePath);
     if (result.ok) {
       setFileError(null);
       setDocument(result.document);

@@ -8,6 +8,9 @@ export const API_OPEN_FILE = 'api:openFile' as const;
 /** renderer → main: 파일 읽기 (baseDir 검증 포함) */
 export const API_READ_FILE = 'api:readFile' as const;
 
+/** renderer → main: 사용자가 명시 선택한 경로를 열기 (baseDir 검증 우회, baseDir 갱신) */
+export const API_OPEN_FILE_PATH = 'api:openFilePath' as const;
+
 /** renderer → main: 외부 URL 열기 */
 export const API_OPEN_EXTERNAL = 'api:openExternal' as const;
 

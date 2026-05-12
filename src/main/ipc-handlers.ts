@@ -4,6 +4,7 @@ import { ipcMain, shell, BrowserWindow, app } from 'electron';
 import {
   API_OPEN_FILE,
   API_READ_FILE,
+  API_OPEN_FILE_PATH,
   API_OPEN_EXTERNAL,
   API_GET_THEME,
   API_THEME_UPDATED,
@@ -71,6 +72,28 @@ export function registerIpcHandlers(
   windowManager: DocumentWindowManager,
   themePackService?: ThemePackService,
 ): () => void {
+  // api:openFilePath — 사용자가 명시 선택한 경로 열기 (Finder, 최근 파일 등)
+  // baseDir 검증 없이 읽고 성공 시 window baseDir를 새 파일의 디렉터리로 갱신.
+  // openViaDialog와 동일한 신뢰 수준 — 사용자가 명시 선택한 경로이므로 traversal 검증 불필요.
+  ipcMain.handle(API_OPEN_FILE_PATH, async (event, filePath: string) => {
+    try {
+      const result = await fileService.readFile(filePath, undefined);
+      if (result.ok) {
+        const win = findWindowByWebContents(event.sender);
+        if (win) {
+          windowManager.setBaseDir(win, dirname(result.document.path));
+        }
+      }
+      return result;
+    } catch (err) {
+      return {
+        ok: false,
+        code: 'DECODE_FAIL',
+        message: err instanceof Error ? err.message : String(err),
+      };
+    }
+  });
+
   // api:openFile — 다이얼로그 열기
   ipcMain.handle(API_OPEN_FILE, async (event) => {
     try {
@@ -180,6 +203,7 @@ export function registerIpcHandlers(
 
   return () => {
     disposeThemeWatch();
+    ipcMain.removeHandler(API_OPEN_FILE_PATH);
     ipcMain.removeHandler(API_OPEN_FILE);
     ipcMain.removeHandler(API_READ_FILE);
     ipcMain.removeHandler(API_OPEN_EXTERNAL);

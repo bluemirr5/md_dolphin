@@ -6,6 +6,7 @@ import { contextBridge, ipcRenderer, webUtils } from 'electron';
 import {
   API_OPEN_FILE,
   API_READ_FILE,
+  API_OPEN_FILE_PATH,
   API_OPEN_EXTERNAL,
   API_DOCUMENT_OPENED,
   API_GET_THEME,
@@ -48,6 +49,13 @@ const api = {
    */
   readFile: (filePath: string, baseDir: string | undefined): Promise<OpenedFileResult> =>
     ipcRenderer.invoke(API_READ_FILE, filePath, baseDir) as Promise<OpenedFileResult>,
+
+  /**
+   * 사용자가 명시 선택한 경로를 연다 (Finder, 최근 파일 등).
+   * baseDir 검증 없이 읽고, 성공 시 main이 baseDir를 새 파일 디렉터리로 갱신.
+   */
+  openFilePath: (filePath: string): Promise<OpenedFileResult> =>
+    ipcRenderer.invoke(API_OPEN_FILE_PATH, filePath) as Promise<OpenedFileResult>,
 
   /**
    * 외부 URL을 시스템 기본 브라우저로 연다.

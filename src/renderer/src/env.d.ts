@@ -66,6 +66,7 @@ interface Window {
   readonly api: {
     readonly openFile: () => Promise<OpenedFileResult | null>;
     readonly readFile: (filePath: string, baseDir: string | undefined) => Promise<OpenedFileResult>;
+    readonly openFilePath: (filePath: string) => Promise<OpenedFileResult>;
     readonly openExternal: (url: string) => Promise<void>;
     readonly getDroppedFilePath: (file: File) => string;
     readonly onDocumentOpened: (callback: (filePath: string) => void) => () => void;
