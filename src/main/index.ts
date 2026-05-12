@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, session, nativeTheme, protocol } from 'electron';
+import { app, BrowserWindow, shell, session, nativeTheme, protocol, nativeImage } from 'electron';
 import { join } from 'node:path';
 import { isMacOS } from '@shared/platform';
 import { enableSandboxBeforeReady, installSessionSecurity, SAFE_EXTERNAL_PROTOCOLS } from './security';
@@ -117,8 +117,15 @@ function createMainWindow(): BrowserWindow {
 
 void app.whenReady().then(() => {
   // dev 모드: 패키지 앱처럼 Dock 아이콘 표시 (production은 번들 .icns 자동 사용)
+  // Electron 41의 dock.setIcon은 내부적으로 비동기 — path 로드 실패 시 unhandled rejection 발생.
+  // nativeImage로 미리 로드 + isEmpty 체크 + 반환값을 Promise로 감싸 .catch()로 흡수.
   if (isDev && isMacOS()) {
-    app.dock?.setIcon(join(app.getAppPath(), 'build/icon.icns'));
+    const icon = nativeImage.createFromPath(join(app.getAppPath(), 'build/icon.icns'));
+    if (!icon.isEmpty()) {
+      void Promise.resolve(app.dock?.setIcon(icon) as unknown).catch(() => {
+        // dev-only nicety — 실패해도 무시
+      });
+    }
   }
 
   // [SEC] session.defaultSession은 whenReady() 이후에 안정적으로 접근 가능
