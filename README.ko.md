@@ -1,110 +1,115 @@
 # md_dolphin
 
-macOS용 마크다운 뷰어 — Electron 기반, 로컬 우선, 개발자가 아닌 사용자를 위해 설계되었습니다.
+> 깔끔하고 집중력 있는 macOS 마크다운 뷰어.
 
-[English README](./README.md)
+[English README](README.md)
 
 ---
 
-## 개요
+md_dolphin은 `.md` 파일을 클릭 한 번으로 바로 열어줍니다. 에디터처럼 무겁지 않고, 설정도 필요 없고, 클라우드도 없습니다. 콘텐츠만, 아름답게 렌더링됩니다.
 
-md_dolphin은 macOS에서 `.md` 파일을 깔끔한 독서 환경으로 엽니다. Electron 기반(결정 1)으로 macOS 12 이상에서 추가 런타임 없이 안정적으로 실행됩니다. 네이티브 앱보다 다운로드 크기가 크지만(결정 12), 별도 설치 없이 바로 사용 가능합니다.
+**기능**
+
+- GitHub Flavored Markdown 즉시 렌더링
+- 읽기에 최적화된 미니멀 UI
+- 파일 연결: `.md` 파일을 클릭하면 md_dolphin으로 바로 열림
+- 라이트/다크 변형을 갖춘 내장 테마 5종, macOS 시스템 설정과 자동 동기화
+- JSON 파일 하나로 커스텀 테마 제작 가능
+- 완전 오프라인 — 계정 없음, 텔레메트리 없음
+- 유니버설 바이너리 — Apple Silicon · Intel 모두 지원
+
+---
+
+## 테마
+
+md_dolphin은 편안한 장시간 독서를 위해 설계된 내장 테마 5종을 제공합니다. 모든 테마는 라이트/다크 변형을 포함하며, macOS 시스템 설정에 따라 자동으로 전환됩니다.
+
+| 테마 | 특징 |
+|---|---|
+| **Default** | 깔끔하고 모던한 — 따뜻한 뉴트럴 톤에 부드러운 대비 |
+| **Solarized** | 클래식. 따뜻한 크림 라이트, 깊은 틸 다크 |
+| **Nord** | 아틱 쿨 — 차분한 블루와 소프트 그레이 |
+| **Ocean** | 시원한 블루에 시안 포인트 |
+| **Autumn** | 풍부한 황토와 앰버 — 따뜻한 톤을 좋아하는 분들께 |
+
+테마 전환은 메뉴 바에서: **View → Theme**
+
+### 커스텀 테마
+
+코드 없이 나만의 테마를 만들 수 있습니다.
+
+1. `light`와 `dark` 색상 맵(21개 토큰)을 담은 JSON 파일을 작성합니다.
+2. `~/Library/Application Support/md-dolphin/themes/`에 넣습니다.
+3. **View → Theme → Refresh Themes**로 목록을 갱신합니다.
+
+<details>
+<summary>테마 JSON 스켈레톤</summary>
+
+```json
+{
+  "name": "나만의 테마",
+  "light": {
+    "color.bg": "#FAFAFA",
+    "color.text": "#1A1A1A"
+  },
+  "dark": {
+    "color.bg": "#1A1A1A",
+    "color.text": "#E0E0E0"
+  },
+  "shiki": { "light": "github-light", "dark": "github-dark" }
+}
+```
+
+전체 토큰 목록: [`docs/themes.md`](docs/themes.md)
+</details>
+
+> **팁:** 원하는 색상 팔레트나 분위기를 AI에게 설명하고 테마 JSON을 생성해달라고 하면 생각보다 잘 됩니다.
 
 ---
 
 ## 설치
 
-### 방법 1 — DMG 직접 다운로드
-
-1. [GitHub Releases](https://github.com/bluemirr5/md_dolphin/releases)로 이동합니다.
-2. `md_dolphin-<버전>-mac-universal.dmg`를 다운로드합니다.
-3. DMG를 열고 `md_dolphin.app`을 `/Applications` 폴더로 드래그합니다.
-4. 처음 실행 시 아래 [Gatekeeper 우회 안내](#gatekeeper-우회-안내)를 따르세요.
-
-### 방법 2 — Homebrew Cask
-
-> 참고: Cask는 공식 `homebrew/cask`가 아닌 커스텀 탭(`bluemirr5/homebrew-md-dolphin`)에 배포됩니다. 공식 등록은 코드 서명(Phase 2) 이후 검토 예정입니다.
+md_dolphin은 커스텀 Homebrew tap을 통해 배포됩니다.
 
 ```bash
 brew tap bluemirr5/md-dolphin
 brew install --cask md-dolphin
 ```
 
-설치 후 처음 실행 시 아래 [Gatekeeper 우회 안내](#gatekeeper-우회-안내)를 따르세요.
+이게 전부입니다. md_dolphin이 `/Applications`에 설치됩니다.
 
 ---
 
-## Gatekeeper 우회 안내
+## 첫 실행 — Gatekeeper 우회
 
-md_dolphin은 Apple 코드 서명 없이 배포됩니다(결정 6 — Apple Developer Program 미가입). macOS Gatekeeper가 처음 실행을 차단합니다. 아래 절차를 따라주세요.
+md_dolphin은 현재 미서명 앱입니다(Apple Developer Program 미가입). macOS가 첫 실행을 차단합니다. 아래 방법 중 하나로 **한 번만** 진행하면 이후에는 정상 실행됩니다.
 
-<!-- TODO: v0.11.1 빌드 후 캡처 → docs/screenshots/install/01-download.png 등 5장 추가 -->
-
-**1단계 — DMG 다운로드**
-
-[GitHub Releases](https://github.com/bluemirr5/md_dolphin/releases)에서 다운로드합니다.
-
-_스크린샷 자리: `docs/screenshots/install/01-download.png`_
-
-**2단계 — DMG 마운트**
-
-다운로드한 `.dmg` 파일을 더블클릭하여 마운트합니다.
-
-_스크린샷 자리: `docs/screenshots/install/02-mount.png`_
-
-**3단계 — Applications로 드래그**
-
-DMG 창 안의 `/Applications` 단축키로 `md_dolphin.app`을 드래그합니다.
-
-_스크린샷 자리: `docs/screenshots/install/03-drag.png`_
-
-**4단계 — 우클릭으로 열기**
-
-Finder에서 `/Applications`로 이동해 `md_dolphin.app`을 우클릭(또는 Control+클릭)하고, 메뉴에서 **열기**를 선택합니다.
-
-_스크린샷 자리: `docs/screenshots/install/04-rightclick.png`_
-
-**5단계 — 확인 다이얼로그에서 열기 클릭**
-
-"확인되지 않은 개발자"라는 경고 다이얼로그가 나타납니다. **열기**를 클릭하세요.
-
-_스크린샷 자리: `docs/screenshots/install/05-confirm.png`_
-
-이 일회성 절차 이후에는 md_dolphin이 정상적으로 실행됩니다.
-
----
-
-## 번들 크기 및 메모리
-
-> 약 130MB 다운로드, Apple Silicon Mac에서 약 200MB 메모리. Electron 기반이라 다른 macOS 앱보다 큽니다. (결정 12)
-
-사용자가 선택에 앞서 충분한 정보를 얻을 수 있도록 솔직하게 표기합니다. 네이티브 macOS 빌드는 미래 탐색 과제로 남겨져 있습니다 ([Phase 2 체크리스트](docs/release/phase2-checklist.md)).
-
----
-
-## 왜 이런 안내가 필요한가요?
-
-md_dolphin은 현재 Apple Developer Program(연 USD 99)에 가입되어 있지 않습니다. Developer ID 인증서가 없으면 macOS Gatekeeper가 더블클릭 실행을 차단합니다.
-
-**이것이 의미하는 것:**
-
-- 처음 실행 시 위의 우클릭 → 열기 방법이 필요합니다.
-- "Apple이 이 앱을 확인할 수 없습니다"와 같은 경고가 표시될 수 있습니다.
-- 이는 앱 자체의 보안 문제가 아닌 배포 방식의 한계입니다.
-
-Phase 2에서 Apple Developer Program에 가입하고 앱을 노타라이즈할 계획입니다. 노타라이즈 완료 후에는 더블클릭으로 바로 실행되며, 이 안내는 업데이트됩니다.
-
----
-
-## SHA256 검증
-
-다운로드 무결성 검증:
+**방법 A — 터미널 (가장 빠름)**
 
 ```bash
-shasum -a 256 -c SHA256SUMS.txt
+xattr -dr com.apple.quarantine /Applications/md_dolphin.app
 ```
 
-`SHA256SUMS.txt` 파일은 GitHub Release 페이지에서 DMG와 함께 제공됩니다.
+이후 md_dolphin을 평소처럼 더블클릭하세요.
+
+**방법 B — Finder**
+
+1. **Finder** → **응용 프로그램**을 엽니다.
+2. `md_dolphin.app`을 우클릭(또는 Control+클릭)합니다.
+3. 메뉴에서 **열기**를 선택합니다.
+4. 보안 경고 다이얼로그에서 **열기**를 클릭합니다.
+
+둘 중 어느 방법이든, 이후부터는 md_dolphin이 정상적으로 실행됩니다.
+
+> **왜 이런 경고가 나타나나요?**  
+> macOS Gatekeeper는 앱에 Apple Developer ID 서명이 있어야 합니다. md_dolphin은 오픈소스 개인 개발 앱으로, Apple Developer Program 가입은 향후 릴리즈에서 계획 중입니다. 이 경고는 배포 방식의 한계이며, 앱 자체의 안전 문제가 아닙니다.
+
+---
+
+## 시스템 요구사항
+
+- macOS 12 Monterey 이상
+- Apple Silicon 또는 Intel
 
 ---
 
@@ -114,16 +119,6 @@ shasum -a 256 -c SHA256SUMS.txt
 
 ---
 
-## 기여
-
-[CONTRIBUTING.md](CONTRIBUTING.md)를 참고하세요.
-
----
-
 ## 보안
 
-취약점 제보는 [SECURITY.md](SECURITY.md)를 참고하세요.
-
----
-
-_스크린샷은 macOS 14 Sonoma 환경에서 캡처되었습니다._
+취약점을 발견하셨나요? [SECURITY.md](SECURITY.md)를 참고하세요.
