@@ -50,7 +50,11 @@ const windowManager = new DocumentWindowManager();
 let themePackService: ReturnType<typeof createThemePackService> | undefined;
 
 // macOS open-file 핸들러 등록 (whenReady 이전 큐잉 시작)
-registerOpenFileHandler(app);
+// getWindow: 앱이 이미 실행 중일 때 열려있는 윈도우로 즉시 전송, 없으면 큐잉
+registerOpenFileHandler(app, () => {
+  const wins = BrowserWindow.getAllWindows();
+  return BrowserWindow.getFocusedWindow() ?? wins[0];
+});
 
 function createMainWindow(): BrowserWindow {
   // 시스템 테마 기반 초기 배경색 결정 (P4-3)
