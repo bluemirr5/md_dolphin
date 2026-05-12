@@ -2,7 +2,7 @@
 
 macOS용 마크다운 뷰어 — Electron 기반, 로컬 우선, 개발자가 아닌 사용자를 위해 설계되었습니다.
 
-[English README](README.md)
+[English README](./README.md)
 
 ---
 
@@ -34,7 +34,7 @@ brew install --cask md-dolphin
 
 ---
 
-## Gatekeeper 우회 안내 <a name="gatekeeper-우회-안내"></a>
+## Gatekeeper 우회 안내
 
 md_dolphin은 Apple 코드 서명 없이 배포됩니다(결정 6 — Apple Developer Program 미가입). macOS Gatekeeper가 처음 실행을 차단합니다. 아래 절차를 따라주세요.
 
@@ -44,31 +44,31 @@ md_dolphin은 Apple 코드 서명 없이 배포됩니다(결정 6 — Apple Deve
 
 [GitHub Releases](https://github.com/bluemirr5/md_dolphin/releases)에서 다운로드합니다.
 
-*스크린샷 자리: `docs/screenshots/install/01-download.png`*
+_스크린샷 자리: `docs/screenshots/install/01-download.png`_
 
 **2단계 — DMG 마운트**
 
 다운로드한 `.dmg` 파일을 더블클릭하여 마운트합니다.
 
-*스크린샷 자리: `docs/screenshots/install/02-mount.png`*
+_스크린샷 자리: `docs/screenshots/install/02-mount.png`_
 
 **3단계 — Applications로 드래그**
 
 DMG 창 안의 `/Applications` 단축키로 `md_dolphin.app`을 드래그합니다.
 
-*스크린샷 자리: `docs/screenshots/install/03-drag.png`*
+_스크린샷 자리: `docs/screenshots/install/03-drag.png`_
 
 **4단계 — 우클릭으로 열기**
 
 Finder에서 `/Applications`로 이동해 `md_dolphin.app`을 우클릭(또는 Control+클릭)하고, 메뉴에서 **열기**를 선택합니다.
 
-*스크린샷 자리: `docs/screenshots/install/04-rightclick.png`*
+_스크린샷 자리: `docs/screenshots/install/04-rightclick.png`_
 
 **5단계 — 확인 다이얼로그에서 열기 클릭**
 
 "확인되지 않은 개발자"라는 경고 다이얼로그가 나타납니다. **열기**를 클릭하세요.
 
-*스크린샷 자리: `docs/screenshots/install/05-confirm.png`*
+_스크린샷 자리: `docs/screenshots/install/05-confirm.png`_
 
 이 일회성 절차 이후에는 md_dolphin이 정상적으로 실행됩니다.
 
@@ -126,4 +126,4 @@ shasum -a 256 -c SHA256SUMS.txt
 
 ---
 
-*스크린샷은 macOS 14 Sonoma 환경에서 캡처되었습니다.*
+_스크린샷은 macOS 14 Sonoma 환경에서 캡처되었습니다._
