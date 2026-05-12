@@ -1,6 +1,6 @@
 {
   "name": "md_dolphin",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "macOS markdown viewer for non-developers",
   "productName": "MD Dolphin",
   "private": true,
