@@ -84,7 +84,7 @@ describe('API_WINDOW_CLOSE 핸들러 — 보안: sender 윈도우만 close', () 
     expect(closeMock).toHaveBeenCalledOnce();
   });
 
-  it('api:windowClose — fromWebContents가 null 반환 시 throw 없이 no-op', async () => {
+  it('api:windowClose — fromWebContents가 null 반환 시 throw 없이 no-op', () => {
     fromWebContentsMock.mockReturnValue(null);
 
     const { fileService, windowManager } = makeStubs();
@@ -92,9 +92,7 @@ describe('API_WINDOW_CLOSE 핸들러 — 보안: sender 윈도우만 close', () 
 
     const handler = ipcHandlers['api:windowClose'];
 
-    await expect(async () => {
-      await handler({ sender: {} });
-    }).not.toThrow();
+    expect(() => handler({ sender: {} })).not.toThrow();
   });
 
   it('api:windowClose — 다른 윈도우의 close()는 호출되지 않는다', async () => {

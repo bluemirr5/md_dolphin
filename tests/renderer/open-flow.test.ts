@@ -5,7 +5,7 @@
 // 2. 같은 path 재오픈 → 탭 수 불변(dedup), setTabDocument는 다시 호출됨
 // 3. file read 실패 → 빈 탭 잔존(document=null), pushRecent 0회
 // 4. too-large → setTabDocument 0회, pushRecent 0회
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { createElement } from 'react';
 import { TabProvider } from '../../src/renderer/src/store/tab-store.factory';
@@ -20,9 +20,9 @@ vi.mock('../../src/renderer/src/store/recent-files-store', () => ({
 
 // ── window.api stub 설치 헬퍼 ─────────────────────────────────────────────────
 interface ApiStub {
-  fileStat?: ReturnType<typeof vi.fn>;
-  openFilePath?: ReturnType<typeof vi.fn>;
-  openFile?: ReturnType<typeof vi.fn>;
+  fileStat?: Mock;
+  openFilePath?: Mock;
+  openFile?: Mock;
 }
 
 function installApi(stub: ApiStub) {
