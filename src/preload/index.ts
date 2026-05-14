@@ -31,6 +31,10 @@ import {
   API_THEME_PACK_SET_ACTIVE,
   API_UPDATE_AVAILABLE,
   API_UPDATE_OPEN_RELEASES,
+  API_VIEW_TAB_CLOSE,
+  API_VIEW_TAB_NEXT,
+  API_VIEW_TAB_PREV,
+  API_WINDOW_CLOSE,
 } from '@shared/ipc-channels';
 import type { OpenedFileResult, StatResult } from '../main/file-service';
 import type { RenderingTheme, ThemeUpdatePayload } from '@shared/theme-types';
@@ -224,6 +228,33 @@ const api = {
   /** GitHub Releases 페이지를 브라우저로 열기 */
   openReleases: (): Promise<void> =>
     ipcRenderer.invoke(API_UPDATE_OPEN_RELEASES) as Promise<void>,
+
+  // ── 사이클 16 신규 IPC ────────────────────────────────────────────────────────
+
+  /** main → renderer: 탭 닫기 요청 이벤트 구독 (⌘W 가로채기, D3) */
+  onTabClose: (callback: () => void): (() => void) => {
+    const handler = () => callback();
+    ipcRenderer.on(API_VIEW_TAB_CLOSE, handler);
+    return () => { ipcRenderer.removeListener(API_VIEW_TAB_CLOSE, handler); };
+  },
+
+  /** main → renderer: 다음 탭 전환 이벤트 구독 (⌥⌘→ / ⇧⌘]) */
+  onTabNext: (callback: () => void): (() => void) => {
+    const handler = () => callback();
+    ipcRenderer.on(API_VIEW_TAB_NEXT, handler);
+    return () => { ipcRenderer.removeListener(API_VIEW_TAB_NEXT, handler); };
+  },
+
+  /** main → renderer: 이전 탭 전환 이벤트 구독 (⌥⌘← / ⇧⌘[) */
+  onTabPrev: (callback: () => void): (() => void) => {
+    const handler = () => callback();
+    ipcRenderer.on(API_VIEW_TAB_PREV, handler);
+    return () => { ipcRenderer.removeListener(API_VIEW_TAB_PREV, handler); };
+  },
+
+  /** 윈도우 닫기 — 마지막 탭 close 시 renderer가 main에 위임 (D3) */
+  closeWindow: (): Promise<void> =>
+    ipcRenderer.invoke(API_WINDOW_CLOSE) as Promise<void>,
 
   // bench:cold-start — dev only (process.env.NODE_ENV !== 'production')
   // AC12: production 빌드에서는 미노출

@@ -27,7 +27,9 @@
       "focusArticle": "문서 포커스",
       "toggleWide": "와이드 모드 전환",
       "theme": "테마",
-      "revealThemesFolder": "테마 폴더 열기"
+      "revealThemesFolder": "테마 폴더 열기",
+      "tabPrev": "이전 탭",
+      "tabNext": "다음 탭"
     },
     "window": {
       "label": "윈도우"
@@ -85,6 +87,12 @@
     "outline": {
       "empty": "목차가 없습니다."
     }
+  },
+  "tab": {
+    "close": {
+      "aria": "탭 닫기"
+    },
+    "untitled": "새 탭"
   },
   "welcome": {
     "ariaLabel": "환영 화면",

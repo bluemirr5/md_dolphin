@@ -1,9 +1,18 @@
 // document-store.factory — React Context + Provider
 // 윈도우 진입점(App.tsx)에서 1회 createDocumentStore() 호출 후 Context로 주입
-// 설계 제약: ThemeProvider(외) → DocumentProvider(내) 순서 고정 (사이클 4 적용 시)
-import { createContext, useContext, useRef, type ReactNode } from 'react';
+// 설계 제약: ThemeProvider(외) → TabProvider → DocumentProvider(내) 순서 고정 (사이클 16)
+//
+// 사이클 16 (D2): DocumentProvider는 TabStore를 Context에서 받아 어댑터를 생성.
+// 기존 컴포넌트(SidebarView/useScrollSpy/ErrorState/MarkdownRenderer) 인터페이스 변경 0.
+import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react';
 import { useStore } from 'zustand';
-import { createDocumentStore, type DocumentStore, type DocumentState } from './document-store';
+import {
+  createDocumentStoreAdapter,
+  type DocumentStore,
+  type DocumentStoreAdapter,
+  type DocumentState,
+} from './document-store';
+import { useTabStoreRef } from './tab-store.factory';
 
 const DocumentStoreContext = createContext<DocumentStore | null>(null);
 
@@ -12,11 +21,21 @@ interface DocumentProviderProps {
 }
 
 export function DocumentProvider({ children }: DocumentProviderProps): JSX.Element {
+  // TabStore reference 주입 — TabProvider가 상위에 있어야 함 (설계 제약)
+  const tabStore = useTabStoreRef();
+
   // useRef로 Provider 마운트당 1회만 store 생성 (렌더 사이드이펙트 방지)
-  const storeRef = useRef<DocumentStore | null>(null);
+  const storeRef = useRef<DocumentStoreAdapter | null>(null);
   if (!storeRef.current) {
-    storeRef.current = createDocumentStore();
+    storeRef.current = createDocumentStoreAdapter(tabStore);
   }
+
+  // Provider 언마운트 시 tabStore 구독 해제 — Strict Mode 이중 마운트·HMR·다중 윈도우 구독 누적 방지
+  useEffect(() => {
+    return () => {
+      storeRef.current?.dispose();
+    };
+  }, []);
 
   return (
     <DocumentStoreContext.Provider value={storeRef.current}>

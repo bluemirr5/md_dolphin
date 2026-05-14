@@ -93,3 +93,17 @@ export const API_UPDATE_AVAILABLE = 'api:updateAvailable' as const;
 
 /** renderer → main: GitHub Releases 페이지 열기 (invoke) */
 export const API_UPDATE_OPEN_RELEASES = 'api:updateOpenReleases' as const;
+
+// ── 사이클 16 신규 채널 ────────────────────────────────────────────────────────
+
+/** main → renderer: 탭 닫기 요청 push (on) — ⌘W 가로채기 (D3) */
+export const API_VIEW_TAB_CLOSE = 'view:tab-close' as const;
+
+/** main → renderer: 다음 탭으로 전환 push (on) — ⌥⌘→ / ⇧⌘] */
+export const API_VIEW_TAB_NEXT = 'view:tab-next' as const;
+
+/** main → renderer: 이전 탭으로 전환 push (on) — ⌥⌘← / ⇧⌘[ */
+export const API_VIEW_TAB_PREV = 'view:tab-prev' as const;
+
+/** renderer → main: 윈도우 닫기 invoke (마지막 탭 close 시 renderer가 위임, D3) */
+export const API_WINDOW_CLOSE = 'api:windowClose' as const;

@@ -27,7 +27,9 @@
       "focusArticle": "Focus Article",
       "toggleWide": "Toggle Wide Mode",
       "theme": "Theme",
-      "revealThemesFolder": "Reveal Themes Folder"
+      "revealThemesFolder": "Reveal Themes Folder",
+      "tabPrev": "Previous Tab",
+      "tabNext": "Next Tab"
     },
     "window": {
       "label": "Window"
@@ -85,6 +87,12 @@
     "outline": {
       "empty": "No outline available."
     }
+  },
+  "tab": {
+    "close": {
+      "aria": "Close tab"
+    },
+    "untitled": "Untitled"
   },
   "welcome": {
     "ariaLabel": "Welcome screen",

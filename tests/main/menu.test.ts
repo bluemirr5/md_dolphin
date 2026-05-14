@@ -424,3 +424,223 @@ describe('installMenu — themePackService 주입 (사이클 13)', () => {
     });
   });
 });
+
+// ── 사이클 16 신규 테스트 (AC5, AC6) ──────────────────────────────────────────
+
+describe('사이클 16 — ⌘W click 핸들러 + 탭 전환 accelerator (AC5, AC6)', () => {
+  function getFileSubmenu(items: Electron.MenuItemConstructorOptions[]) {
+    const fileMenu = items.find((m) => m.label === 'File');
+    return fileMenu?.submenu as Electron.MenuItemConstructorOptions[] | undefined;
+  }
+
+  function getViewSubmenu(items: Electron.MenuItemConstructorOptions[]) {
+    const viewMenu = items.find((m) => m.label === 'View');
+    return viewMenu?.submenu as Electron.MenuItemConstructorOptions[] | undefined;
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // AC6: File>Close에 role 없음 + click 핸들러가 API_VIEW_TAB_CLOSE push
+  it('AC6 — File>Close에 role 없이 click 핸들러가 등록된다', () => {
+    const { fileService, windowManager } = makeStubs();
+    void installMenu(fileService, windowManager);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const fileSubmenu = getFileSubmenu(items);
+    const closeItem = fileSubmenu?.find((i) => i.label === 'Close');
+    expect(closeItem).toBeDefined();
+    expect(closeItem?.role).toBeUndefined();
+    expect(closeItem?.click).toBeDefined();
+  });
+
+  it('AC6 — File>Close 클릭 시 API_VIEW_TAB_CLOSE(view:tab-close) IPC push 1회', () => {
+    const { fileService, windowManager } = makeStubs();
+    const sendSpy = vi.fn();
+    const win = { webContents: { send: sendSpy, setZoomLevel: vi.fn(), getZoomLevel: vi.fn().mockReturnValue(0) } } as unknown as Electron.BrowserWindow;
+    void installMenu(fileService, windowManager, undefined, undefined, () => win);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const fileSubmenu = getFileSubmenu(items);
+    const closeItem = fileSubmenu?.find((i) => i.label === 'Close');
+
+    (closeItem?.click as () => void)?.();
+
+    expect(sendSpy).toHaveBeenCalledWith('view:tab-close');
+  });
+
+  // AC5: 탭 전환 4 accelerator → API_VIEW_TAB_NEXT/PREV IPC push
+  it('AC5 — ⌥⌘← accelerator 항목 존재 (Alt+CmdOrCtrl+Left)', () => {
+    const { fileService, windowManager } = makeStubs();
+    void installMenu(fileService, windowManager);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const viewSubmenu = getViewSubmenu(items);
+    const prevLeft = viewSubmenu?.find((i) => i.accelerator === 'Alt+CmdOrCtrl+Left');
+    expect(prevLeft).toBeDefined();
+  });
+
+  it('AC5 — ⌥⌘→ accelerator 항목 존재 (Alt+CmdOrCtrl+Right)', () => {
+    const { fileService, windowManager } = makeStubs();
+    void installMenu(fileService, windowManager);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const viewSubmenu = getViewSubmenu(items);
+    const nextRight = viewSubmenu?.find((i) => i.accelerator === 'Alt+CmdOrCtrl+Right');
+    expect(nextRight).toBeDefined();
+  });
+
+  it('AC5 — ⇧⌘[ accelerator 항목 존재 (Shift+CmdOrCtrl+[)', () => {
+    const { fileService, windowManager } = makeStubs();
+    void installMenu(fileService, windowManager);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const viewSubmenu = getViewSubmenu(items);
+    const prevBracket = viewSubmenu?.find((i) => i.accelerator === 'Shift+CmdOrCtrl+[');
+    expect(prevBracket).toBeDefined();
+  });
+
+  it('AC5 — ⇧⌘] accelerator 항목 존재 (Shift+CmdOrCtrl+])', () => {
+    const { fileService, windowManager } = makeStubs();
+    void installMenu(fileService, windowManager);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const viewSubmenu = getViewSubmenu(items);
+    const nextBracket = viewSubmenu?.find((i) => i.accelerator === 'Shift+CmdOrCtrl+]');
+    expect(nextBracket).toBeDefined();
+  });
+
+  it('AC5 — ⌥⌘← 클릭 시 view:tab-prev IPC push', () => {
+    const { fileService, windowManager } = makeStubs();
+    const sendSpy = vi.fn();
+    const win = { webContents: { send: sendSpy, setZoomLevel: vi.fn(), getZoomLevel: vi.fn().mockReturnValue(0) } } as unknown as Electron.BrowserWindow;
+    void installMenu(fileService, windowManager, undefined, undefined, () => win);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const viewSubmenu = getViewSubmenu(items);
+    const prevLeft = viewSubmenu?.find((i) => i.accelerator === 'Alt+CmdOrCtrl+Left');
+
+    (prevLeft?.click as () => void)?.();
+
+    expect(sendSpy).toHaveBeenCalledWith('view:tab-prev');
+  });
+
+  it('AC5 — ⌥⌘→ 클릭 시 view:tab-next IPC push', () => {
+    const { fileService, windowManager } = makeStubs();
+    const sendSpy = vi.fn();
+    const win = { webContents: { send: sendSpy, setZoomLevel: vi.fn(), getZoomLevel: vi.fn().mockReturnValue(0) } } as unknown as Electron.BrowserWindow;
+    void installMenu(fileService, windowManager, undefined, undefined, () => win);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const viewSubmenu = getViewSubmenu(items);
+    const nextRight = viewSubmenu?.find((i) => i.accelerator === 'Alt+CmdOrCtrl+Right');
+
+    (nextRight?.click as () => void)?.();
+
+    expect(sendSpy).toHaveBeenCalledWith('view:tab-next');
+  });
+
+  // alternate accelerator visible: false 검증 — 메뉴 중복 라벨 방지
+  it('alternate ⇧⌘[ 항목은 visible: false이고 accelerator는 유지된다', () => {
+    const { fileService, windowManager } = makeStubs();
+    void installMenu(fileService, windowManager);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const viewSubmenu = getViewSubmenu(items);
+    const prevBracket = viewSubmenu?.find((i) => i.accelerator === 'Shift+CmdOrCtrl+[');
+    expect(prevBracket).toBeDefined();
+    expect(prevBracket?.visible).toBe(false);
+  });
+
+  it('alternate ⇧⌘] 항목은 visible: false이고 accelerator는 유지된다', () => {
+    const { fileService, windowManager } = makeStubs();
+    void installMenu(fileService, windowManager);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const viewSubmenu = getViewSubmenu(items);
+    const nextBracket = viewSubmenu?.find((i) => i.accelerator === 'Shift+CmdOrCtrl+]');
+    expect(nextBracket).toBeDefined();
+    expect(nextBracket?.visible).toBe(false);
+  });
+});
+
+// ── 사이클 16 보강 (alternate click IPC + ⌘3 회귀) ────────────────────────────
+
+describe('사이클 16 보강 — alternate ⇧⌘[/] click → IPC (AC5)', () => {
+  function getViewSubmenu(items: Electron.MenuItemConstructorOptions[]) {
+    const viewMenu = items.find((m) => m.label === 'View');
+    return viewMenu?.submenu as Electron.MenuItemConstructorOptions[] | undefined;
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('alternate ⇧⌘[ 클릭 시 view:tab-prev IPC push', () => {
+    const { fileService, windowManager } = makeStubs();
+    const sendSpy = vi.fn();
+    const win = { webContents: { send: sendSpy, setZoomLevel: vi.fn(), getZoomLevel: vi.fn().mockReturnValue(0) } } as unknown as Electron.BrowserWindow;
+    void installMenu(fileService, windowManager, undefined, undefined, () => win);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const viewSubmenu = getViewSubmenu(items);
+    const prevBracket = viewSubmenu?.find((i) => i.accelerator === 'Shift+CmdOrCtrl+[');
+
+    (prevBracket?.click as () => void)?.();
+
+    expect(sendSpy).toHaveBeenCalledWith('view:tab-prev');
+  });
+
+  it('alternate ⇧⌘] 클릭 시 view:tab-next IPC push', () => {
+    const { fileService, windowManager } = makeStubs();
+    const sendSpy = vi.fn();
+    const win = { webContents: { send: sendSpy, setZoomLevel: vi.fn(), getZoomLevel: vi.fn().mockReturnValue(0) } } as unknown as Electron.BrowserWindow;
+    void installMenu(fileService, windowManager, undefined, undefined, () => win);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const viewSubmenu = getViewSubmenu(items);
+    const nextBracket = viewSubmenu?.find((i) => i.accelerator === 'Shift+CmdOrCtrl+]');
+
+    (nextBracket?.click as () => void)?.();
+
+    expect(sendSpy).toHaveBeenCalledWith('view:tab-next');
+  });
+});
+
+describe('사이클 16 보강 — ⌘3(Toggle Wide) 회귀 (기존 매핑 깨지지 않음)', () => {
+  function getViewSubmenu(items: Electron.MenuItemConstructorOptions[]) {
+    const viewMenu = items.find((m) => m.label === 'View');
+    return viewMenu?.submenu as Electron.MenuItemConstructorOptions[] | undefined;
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('View > Toggle Wide accelerator가 CmdOrCtrl+3이다 (⌘3 회귀)', () => {
+    const { fileService, windowManager } = makeStubs();
+    void installMenu(fileService, windowManager);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const viewSubmenu = getViewSubmenu(items);
+    const wideItem = viewSubmenu?.find((i) => i.accelerator === 'CmdOrCtrl+3');
+    expect(wideItem).toBeDefined();
+    expect(wideItem?.accelerator).toBe('CmdOrCtrl+3');
+  });
+
+  it('View > Toggle Wide 클릭 시 view:toggle-wide IPC push (⌘3 회귀)', () => {
+    const { fileService, windowManager } = makeStubs();
+    const sendSpy = vi.fn();
+    const win = { webContents: { send: sendSpy, setZoomLevel: vi.fn(), getZoomLevel: vi.fn().mockReturnValue(0) } } as unknown as Electron.BrowserWindow;
+    void installMenu(fileService, windowManager, undefined, undefined, () => win);
+
+    const items = (Menu as unknown as { _getItems: () => Electron.MenuItemConstructorOptions[] })._getItems();
+    const viewSubmenu = getViewSubmenu(items);
+    const wideItem = viewSubmenu?.find((i) => i.accelerator === 'CmdOrCtrl+3');
+
+    (wideItem?.click as () => void)?.();
+
+    expect(sendSpy).toHaveBeenCalledWith('view:toggle-wide');
+  });
+});

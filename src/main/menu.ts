@@ -15,6 +15,9 @@ import {
   API_VIEW_FOCUS_ARTICLE,
   API_VIEW_TOGGLE_WIDE,
   API_THEME_PACK_SET_ACTIVE,
+  API_VIEW_TAB_CLOSE,
+  API_VIEW_TAB_NEXT,
+  API_VIEW_TAB_PREV,
 } from '@shared/ipc-channels';
 import { lookup, normalizeMainLocale } from '@shared/i18n-lookup';
 import type { FileService } from './file-service';
@@ -107,9 +110,14 @@ export async function installMenu(
       },
       { type: 'separator' },
       {
+        // D3: role:'close' 제거 → click 핸들러로 API_VIEW_TAB_CLOSE IPC push
+        // renderer가 마지막 탭이면 api:windowClose invoke로 main에 윈도우 close 위임
         label: t('menu.file.close'),
         accelerator: 'CmdOrCtrl+W',
-        role: 'close',
+        click: () => {
+          const win = getFocusedWindow();
+          win?.webContents.send(API_VIEW_TAB_CLOSE);
+        },
       },
     ],
   });
@@ -179,6 +187,44 @@ export async function installMenu(
         click: () => {
           const win = getFocusedWindow();
           win?.webContents.send(API_VIEW_TOGGLE_WIDE);
+        },
+      },
+      { type: 'separator' as const },
+      // P16-2: 탭 전환 4 accelerator — ⌥⌘←/→ + ⇧⌘[/]
+      {
+        label: t('menu.view.tabPrev'),
+        accelerator: 'Alt+CmdOrCtrl+Left',
+        click: () => {
+          const win = getFocusedWindow();
+          win?.webContents.send(API_VIEW_TAB_PREV);
+        },
+      },
+      {
+        label: t('menu.view.tabNext'),
+        accelerator: 'Alt+CmdOrCtrl+Right',
+        click: () => {
+          const win = getFocusedWindow();
+          win?.webContents.send(API_VIEW_TAB_NEXT);
+        },
+      },
+      {
+        // alternate accelerator — visible: false로 메뉴 중복 라벨 숨김, accelerator 등록은 유지
+        label: t('menu.view.tabPrev'),
+        accelerator: 'Shift+CmdOrCtrl+[',
+        visible: false,
+        click: () => {
+          const win = getFocusedWindow();
+          win?.webContents.send(API_VIEW_TAB_PREV);
+        },
+      },
+      {
+        // alternate accelerator — visible: false로 메뉴 중복 라벨 숨김, accelerator 등록은 유지
+        label: t('menu.view.tabNext'),
+        accelerator: 'Shift+CmdOrCtrl+]',
+        visible: false,
+        click: () => {
+          const win = getFocusedWindow();
+          win?.webContents.send(API_VIEW_TAB_NEXT);
         },
       },
       ...(!app.isPackaged ? [

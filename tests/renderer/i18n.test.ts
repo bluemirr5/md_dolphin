@@ -96,6 +96,30 @@ describe('createI18nInstance — en locale', () => {
   });
 });
 
+// ── 사이클 16 신규 (AC7) ─────────────────────────────────────────────────────
+
+describe('사이클 16 i18n — tab.close.aria / tab.untitled 키 존재 (AC7)', () => {
+  it('ko: tab.close.aria = 탭 닫기', async () => {
+    const i18n = await createI18nInstance('ko');
+    expect(i18n.t('tab.close.aria')).toBe('탭 닫기');
+  });
+
+  it('ko: tab.untitled = 새 탭', async () => {
+    const i18n = await createI18nInstance('ko');
+    expect(i18n.t('tab.untitled')).toBe('새 탭');
+  });
+
+  it('en: tab.close.aria = Close tab', async () => {
+    const i18n = await createI18nInstance('en');
+    expect(i18n.t('tab.close.aria')).toBe('Close tab');
+  });
+
+  it('en: tab.untitled = Untitled', async () => {
+    const i18n = await createI18nInstance('en');
+    expect(i18n.t('tab.untitled')).toBe('Untitled');
+  });
+});
+
 describe('createI18nInstance — fallback 동작', () => {
   it('미존재 키는 키 문자열 그대로 반환', async () => {
     const i18n = await createI18nInstance('en');

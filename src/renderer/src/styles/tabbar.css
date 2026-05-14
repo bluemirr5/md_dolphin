@@ -1,0 +1,85 @@
+/* tabbar.css — 사이클 16 MVP 탭 바
+ * TitleBar 아래 별도 행 (P16-3)
+ * 모든 클릭 영역 -webkit-app-region: no-drag 명시 (P16-2) */
+
+.md-tabbar {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  height: var(--tabbar-height, 28px);
+  /* 타이틀 바 아래 fixed 배치 */
+  position: fixed;
+  top: var(--titlebar-height);
+  left: 0;
+  right: 0;
+  z-index: 19;
+  background-color: var(--sidebar-bg, #f5f5f5);
+  border-bottom: 1px solid var(--sidebar-border, #e0e0e0);
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* drag region 명시적 no-drag — P16-2 */
+  -webkit-app-region: no-drag;
+  user-select: none;
+}
+
+.md-tabbar__tab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px 0 12px;
+  min-width: 80px;
+  max-width: 200px;
+  height: 100%;
+  cursor: pointer;
+  border-right: 1px solid var(--sidebar-border, #e0e0e0);
+  font-size: 12px;
+  color: var(--text, #333);
+  opacity: 0.65;
+  /* drag region 명시적 no-drag — P16-2 */
+  -webkit-app-region: no-drag;
+  box-sizing: border-box;
+}
+
+.md-tabbar__tab:hover {
+  opacity: 0.85;
+  background-color: var(--code-bg, rgba(0, 0, 0, 0.04));
+}
+
+.md-tabbar__tab--active {
+  opacity: 1;
+  background-color: var(--code-bg, rgba(0, 0, 0, 0.06));
+  border-bottom: 2px solid var(--sidebar-link-active, #0066cc);
+}
+
+.md-tabbar__tab-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.md-tabbar__tab-close {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--text, #333);
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  opacity: 0.5;
+  /* drag region 명시적 no-drag — P16-2 */
+  -webkit-app-region: no-drag;
+}
+
+.md-tabbar__tab-close:hover {
+  opacity: 1;
+  background-color: var(--code-bg, rgba(0, 0, 0, 0.1));
+}

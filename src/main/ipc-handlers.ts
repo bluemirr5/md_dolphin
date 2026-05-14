@@ -16,6 +16,7 @@ import {
   API_THEME_PACK_REVEAL_FOLDER,
   API_THEME_PACK_LIST_CHANGED,
   API_THEME_PACK_MENU_SYNC,
+  API_WINDOW_CLOSE,
 } from '@shared/ipc-channels';
 import type { FileService } from './file-service';
 import type { DocumentWindowManager } from './document-window';
@@ -196,6 +197,15 @@ export function registerIpcHandlers(
     event.returnValue = win?.id ?? -1;
   });
 
+  // ── 사이클 16 신규 핸들러 ────────────────────────────────────────────────────
+
+  // api:windowClose — 마지막 탭 close 시 renderer가 위임 (D3)
+  // focused window만 close — 다른 윈도우 영향 0 (보안 제약 준수)
+  ipcMain.handle(API_WINDOW_CLOSE, (event) => {
+    const win = findWindowByWebContents(event.sender);
+    win?.close();
+  });
+
   // nativeTheme.updated → 모든 BrowserWindow에 broadcast (app 수명 단일 등록)
   const disposeThemeWatch = watchTheme((payload: ThemeUpdatePayload) => {
     broadcastThemeUpdate(payload);
@@ -218,6 +228,8 @@ export function registerIpcHandlers(
       ipcMain.removeHandler(API_THEME_PACK_REVEAL_FOLDER);
       ipcMain.removeAllListeners(API_THEME_PACK_MENU_SYNC);
     }
+    // 사이클 16 채널 정리
+    ipcMain.removeHandler(API_WINDOW_CLOSE);
   };
 }
 

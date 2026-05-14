@@ -109,5 +109,14 @@ interface Window {
     readonly onUpdateAvailable: (callback: (version: string) => void) => () => void;
     /** GitHub Releases 페이지를 브라우저로 열기 */
     readonly openReleases: () => Promise<void>;
+    // 사이클 16 신규 IPC
+    /** main → renderer: 탭 닫기 요청 이벤트 구독 (⌘W 가로채기, D3) */
+    readonly onTabClose: (callback: () => void) => () => void;
+    /** main → renderer: 다음 탭 전환 이벤트 구독 */
+    readonly onTabNext: (callback: () => void) => () => void;
+    /** main → renderer: 이전 탭 전환 이벤트 구독 */
+    readonly onTabPrev: (callback: () => void) => () => void;
+    /** 윈도우 닫기 — 마지막 탭 close 시 renderer가 main에 위임 (D3) */
+    readonly closeWindow: () => Promise<void>;
   };
 }
