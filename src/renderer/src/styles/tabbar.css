@@ -23,6 +23,7 @@
 }
 
 .md-tabbar__tab {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -82,4 +83,29 @@
 .md-tabbar__tab-close:hover {
   opacity: 1;
   background-color: var(--code-bg, rgba(0, 0, 0, 0.1));
+}
+
+/* 드래그 중인 탭 — 반투명으로 "옮기는 중" 표시 */
+.md-tabbar__tab--dragging {
+  opacity: 0.35;
+}
+
+/* 드롭 인디케이터 — ::before(왼쪽), ::after(오른쪽) 가상 요소 사용 (레이아웃 영향 없음) */
+.md-tabbar__tab--drop-before::before,
+.md-tabbar__tab--drop-after::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  background: var(--sidebar-link-active, #0066cc);
+  border-radius: 1px;
+}
+
+.md-tabbar__tab--drop-before::before {
+  left: 0;
+}
+
+.md-tabbar__tab--drop-after::after {
+  right: 0;
 }

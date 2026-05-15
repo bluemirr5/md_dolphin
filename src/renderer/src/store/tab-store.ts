@@ -29,6 +29,8 @@ export interface TabsState {
   readonly focusOrAddByPath: (path: string) => TabId;
   /** 특정 탭의 document를 갱신한다. 미존재 id → no-op (R3). */
   readonly setTabDocument: (id: TabId, document: DocumentData | null) => void;
+  /** 탭 순서를 변경한다. toSlot은 삽입 슬롯(0..tabs.length). 범위 밖 → no-op. */
+  readonly moveTab: (fromIndex: number, toSlot: number) => void;
 }
 
 /** TabId 생성 헬퍼 — 테스트에서 crypto mock으로 제어 가능 */
@@ -104,6 +106,19 @@ export function createTabStore() {
       set((state) => ({
         tabs: state.tabs.map((t) => (t.id === id ? { ...t, document } : t)),
       }));
+    },
+
+    moveTab: (fromIndex: number, toSlot: number): void => {
+      const { tabs } = get();
+      if (fromIndex < 0 || fromIndex >= tabs.length) return;
+      if (toSlot < 0 || toSlot > tabs.length) return;
+      const newTabs = [...tabs];
+      const removed = newTabs.splice(fromIndex, 1);
+      const moved = removed[0];
+      if (!moved) return;
+      // from < toSlot이면 splice로 인덱스 1 감소 보정
+      newTabs.splice(fromIndex < toSlot ? toSlot - 1 : toSlot, 0, moved);
+      set({ tabs: newTabs });
     },
   }));
 }

@@ -155,6 +155,89 @@ describe('R2 — closeTab 마지막/경계 (AC2)', () => {
   });
 });
 
+// ── R4: moveTab 탭 순서 변경 ─────────────────────────────────────────────────
+
+describe('R4 — moveTab 탭 순서 변경', () => {
+  beforeEach(() => {
+    uuidCounter = 0;
+  });
+
+  it('앞에서 뒤로 이동 (from < to): [A,B,C] moveTab(0,3) → [B,C,A]', () => {
+    const store = makeStore();
+    store.getState().addTab('/a.md', null);
+    store.getState().addTab('/b.md', null);
+    store.getState().addTab('/c.md', null);
+    store.getState().moveTab(0, 3);
+    expect(store.getState().tabs.map((t) => t.path)).toEqual(['/b.md', '/c.md', '/a.md']);
+  });
+
+  it('뒤에서 앞으로 이동 (from > to): [A,B,C] moveTab(2,0) → [C,A,B]', () => {
+    const store = makeStore();
+    store.getState().addTab('/a.md', null);
+    store.getState().addTab('/b.md', null);
+    store.getState().addTab('/c.md', null);
+    store.getState().moveTab(2, 0);
+    expect(store.getState().tabs.map((t) => t.path)).toEqual(['/c.md', '/a.md', '/b.md']);
+  });
+
+  it('중간 이동: [A,B,C] moveTab(0,2) → [B,A,C]', () => {
+    const store = makeStore();
+    store.getState().addTab('/a.md', null);
+    store.getState().addTab('/b.md', null);
+    store.getState().addTab('/c.md', null);
+    store.getState().moveTab(0, 2);
+    expect(store.getState().tabs.map((t) => t.path)).toEqual(['/b.md', '/a.md', '/c.md']);
+  });
+
+  it('같은 위치(from === toSlot-1) 이동 시 탭 순서 불변', () => {
+    const store = makeStore();
+    store.getState().addTab('/a.md', null);
+    store.getState().addTab('/b.md', null);
+    const pathsBefore = store.getState().tabs.map((t) => t.path);
+    store.getState().moveTab(0, 1);
+    expect(store.getState().tabs.map((t) => t.path)).toEqual(pathsBefore);
+  });
+
+  it('activeId는 이동 후에도 보존된다 (드래그한 탭이 active)', () => {
+    const store = makeStore();
+    store.getState().addTab('/a.md', null);
+    store.getState().addTab('/b.md', null);
+    const id3 = store.getState().addTab('/c.md', null);
+    store.getState().moveTab(2, 0);
+    expect(store.getState().activeId).toBe(id3);
+  });
+
+  it('activeId는 이동 후에도 보존된다 (다른 탭이 active)', () => {
+    const store = makeStore();
+    const id1 = store.getState().addTab('/a.md', null);
+    store.getState().addTab('/b.md', null);
+    store.getState().addTab('/c.md', null);
+    store.getState().activateTab(id1);
+    store.getState().moveTab(2, 0);
+    expect(store.getState().activeId).toBe(id1);
+  });
+
+  it('범위 밖 fromIndex(-1, tabs.length) → no-op', () => {
+    const store = makeStore();
+    store.getState().addTab('/a.md', null);
+    store.getState().addTab('/b.md', null);
+    const pathsBefore = store.getState().tabs.map((t) => t.path);
+    store.getState().moveTab(-1, 1);
+    store.getState().moveTab(5, 1);
+    expect(store.getState().tabs.map((t) => t.path)).toEqual(pathsBefore);
+  });
+
+  it('범위 밖 toSlot(< 0, > tabs.length) → no-op', () => {
+    const store = makeStore();
+    store.getState().addTab('/a.md', null);
+    store.getState().addTab('/b.md', null);
+    const pathsBefore = store.getState().tabs.map((t) => t.path);
+    store.getState().moveTab(0, -1);
+    store.getState().moveTab(0, 5);
+    expect(store.getState().tabs.map((t) => t.path)).toEqual(pathsBefore);
+  });
+});
+
 // ── R3: activateTab + setTabDocument no-op 가드 ───────────────────────────────
 
 describe('R3 — activateTab + setTabDocument no-op 가드', () => {
